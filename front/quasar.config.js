@@ -56,10 +56,10 @@ const _getConfigOrThrow = (_path) => {
   const val = _.get(appConfig, _path)
 
   if (typeof val === 'undefined') {
-    throw new Error(`Paramètre obligatoire manquant : ${_.toString(_path)}`)
+    console.error(`Paramètre obligatoire manquant : ${_.toString(_path)}`)
   }
 
-  return _loopOverObject(val)
+  return _loopOverObject(val ?? {})
 }
 
 module.exports = configure(function (/* ctx */) {
