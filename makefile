@@ -12,6 +12,10 @@ check:
 #########################################
 ################ BACKEND ################
 #########################################
+back-tests:
+	@cd $(FOLDER_BACK) && \
+	./vendor/phpunit/phpunit/phpunit -c ./phpunit.xml.dist
+
 back-fixer:
 	@cd $(FOLDER_BACK) && \
 	./vendor/bin/php-cs-fixer fix src --show-progress=dots
