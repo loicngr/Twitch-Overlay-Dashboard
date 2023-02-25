@@ -1,0 +1,50 @@
+security:
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\Manager
+                property: email
+        jwt_user_provider:
+            entity:
+                class: App\Entity\Manager
+                property: id
+
+    firewalls:
+        version:
+            pattern: ^/version
+            security: false
+        token_refresh:
+            pattern: ^/token/refresh
+            stateless: true
+            refresh_jwt:
+                provider: jwt_user_provider
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        login:
+            pattern: ^/login
+            stateless: true
+            json_login:
+                check_path: /login_check
+                username_path: email
+                password_path: password
+                provider: app_user_provider
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+        api:
+            pattern: ^/
+            stateless: true
+            provider: jwt_user_provider
+            jwt: ~
+
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_USER
+        ROLE_SUPER_ADMIN: ROLE_ADMIN
+
+    access_control:
+        - { path: '^/login', roles: PUBLIC_ACCESS }
+        - { path: '^/token/refresh', roles: PUBLIC_ACCESS }
+        - { path: '^/*', roles: ROLE_ADMIN }
