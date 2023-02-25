@@ -16,13 +16,14 @@ const APP_ENV = process.env.APP_ENV || (
     ? 'dev'
     : 'prod'
 )
+
 const sConfigFile = `./config.${APP_ENV}.js`
 console.log(` > Importation des paramètres à partir du fichier ${sConfigFile}`)
 if (!fs.existsSync(sConfigFile)) {
-  throw new Error(`Le fichier de configuration ${sConfigFile} est manquant.`)
+  console.error(`Le fichier de configuration ${sConfigFile} est manquant.`)
 }
 
-const appConfig = require(`./config.${APP_ENV}`)
+const appConfig = require(`./config.${APP_ENV}`) ?? {}
 
 const _getEnvVariables = () => {
   const variables = {}
@@ -56,10 +57,10 @@ const _getConfigOrThrow = (_path) => {
   const val = _.get(appConfig, _path)
 
   if (typeof val === 'undefined') {
-    console.error(`Paramètre obligatoire manquant : ${_.toString(_path)}`)
+    throw new Error(`Paramètre obligatoire manquant : ${_.toString(_path)}`)
   }
 
-  return _loopOverObject(val ?? {})
+  return _loopOverObject(val)
 }
 
 module.exports = configure(function (/* ctx */) {
