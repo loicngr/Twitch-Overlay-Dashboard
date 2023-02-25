@@ -50,7 +50,7 @@ const _getEnvVariables = () => {
 }
 const _loopOverObject = (obj) => {
   const envVars = _getEnvVariables()
-  const values = _.cloneDeep(obj)
+  const values = _.cloneDeep((obj ?? {}))
 
   for (const envVarsKey in envVars) {
     _.set(values, envVarsKey, envVars[envVarsKey])
@@ -59,18 +59,10 @@ const _loopOverObject = (obj) => {
   return values
 }
 
-const _getConfigOrThrow = (_path) => {
-  const val = _.get(appConfig, _path)
-
-  if (typeof val === 'undefined') {
-    throw new Error(`Paramètre obligatoire manquant : ${_.toString(_path)}`)
-  }
-
-  return _loopOverObject(val)
-}
+const _getConfigOrThrow = (_path) => _loopOverObject(_.get(appConfig, _path, {}))
 
 module.exports = configure(function (/* ctx */) {
-  const APP = _getConfigOrThrow(['APP'])
+  const { APP } = _getConfigOrThrow(['APP'])
   const APP_SIMPLE_NAME = APP.name.toLowerCase()
 
   return {
