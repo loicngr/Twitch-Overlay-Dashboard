@@ -23,7 +23,13 @@ if (!fs.existsSync(sConfigFile)) {
   console.error(`Le fichier de configuration ${sConfigFile} est manquant.`)
 }
 
-const appConfig = require(`./config.${APP_ENV}`) ?? {}
+let appConfig
+
+try {
+  appConfig = require(`./config.${APP_ENV}`)
+} catch (e) {
+  appConfig = {}
+}
 
 const _getEnvVariables = () => {
   const variables = {}
