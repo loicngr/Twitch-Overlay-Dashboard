@@ -84,6 +84,17 @@ final class Version20230225144606 extends AbstractMigration
         $this->addSql(
             'ALTER TABLE stream_game ADD CONSTRAINT FK_943C082FE48FD905 FOREIGN KEY (game_id) REFERENCES game (id) ON DELETE CASCADE',
         );
+
+        $this->addSql(
+            'CREATE TABLE refresh_tokens (
+                    id INT AUTO_INCREMENT NOT NULL,
+                    refresh_token VARCHAR(128) NOT NULL,
+                    username VARCHAR(255) NOT NULL,
+                    valid DATETIME NOT NULL,
+                    UNIQUE INDEX UNIQ_9BACE7E1C74F2195 (refresh_token),
+                    PRIMARY KEY(id)
+                ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB',
+        );
     }
 
     public function down(Schema $schema): void
@@ -96,5 +107,6 @@ final class Version20230225144606 extends AbstractMigration
         $this->addSql('DROP TABLE stream_game');
         $this->addSql('DROP TABLE user');
         $this->addSql('DROP TABLE manager');
+        $this->addSql('DROP TABLE refresh_tokens');
     }
 }

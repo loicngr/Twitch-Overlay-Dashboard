@@ -10,7 +10,7 @@ security:
         jwt_user_provider:
             entity:
                 class: App\Entity\Manager
-                property: id
+                property: email
 
     firewalls:
         version:
