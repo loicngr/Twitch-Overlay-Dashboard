@@ -2,34 +2,92 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\StreamRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: StreamRepository::class)]
+#[
+    ORM\Entity(repositoryClass: StreamRepository::class),
+    ApiResource,
+    Get(
+        normalizationContext: [
+            'groups' => [
+                'read:item',
+            ],
+        ],
+    ),
+    GetCollection(
+        normalizationContext: [
+            'groups' => [
+                'read:collection',
+            ],
+        ],
+    ),
+]
 class Stream
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    /** @var int */
+    final public const TYPE_LIVE = 1;
+
+    #[
+        ORM\Id,
+        ORM\GeneratedValue,
+        ORM\Column,
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'streams')]
-    #[ORM\JoinColumn(nullable: false)]
-    protected ?User $userId = null;
+    #[
+        ORM\ManyToOne(inversedBy: 'streams'),
+        ORM\JoinColumn(nullable: false),
+        Groups([
+            'read:item',
+        ]),
+    ]
+    protected ?User $user = null;
 
-    #[ORM\Column]
+    #[
+        ORM\Column,
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?int $type = null;
 
-    #[ORM\Column(length: 255)]
+    #[
+        ORM\Column(length: 255),
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?string $title = null;
 
-    #[ORM\Column]
+    #[
+        ORM\Column,
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?DateTimeImmutable $startAt = null;
 
-    #[ORM\ManyToMany(targetEntity: Game::class, inversedBy: 'streams')]
+    #[
+        ORM\ManyToMany(targetEntity: Game::class, inversedBy: 'streams'),
+        Groups([
+            'read:item',
+        ]),
+    ]
     protected ?Collection $games = null;
 
     public function __construct()
@@ -42,14 +100,21 @@ class Stream
         return $this->id;
     }
 
-    public function getUserId(): ?User
+    public function setId(int $id): self
     {
-        return $this->userId;
+        $this->id = $id;
+
+        return $this;
     }
 
-    public function setUserId(?User $userId): self
+    public function getUser(): ?User
     {
-        $this->userId = $userId;
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

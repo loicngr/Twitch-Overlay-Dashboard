@@ -2,29 +2,79 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\GameRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: GameRepository::class)]
+#[
+    ORM\Entity(repositoryClass: GameRepository::class),
+    ApiResource,
+    Get(
+        normalizationContext: [
+            'groups' => [
+                'read:item',
+            ],
+        ],
+    ),
+    GetCollection(
+        normalizationContext: [
+            'groups' => [
+                'read:collection',
+            ],
+        ],
+    ),
+]
 class Game
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[
+        ORM\Id,
+        ORM\GeneratedValue,
+        ORM\Column,
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[
+        ORM\Column(length: 255),
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?string $name = null;
 
-    #[ORM\Column(length: 300)]
+    #[
+        ORM\Column(length: 300),
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?string $picture = null;
 
-    #[ORM\Column(nullable: true)]
+    #[
+        ORM\Column(nullable: true),
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?int $igdbId = null;
 
-    #[ORM\ManyToMany(targetEntity: Stream::class, mappedBy: 'games')]
+    #[
+        ORM\ManyToMany(targetEntity: Stream::class, mappedBy: 'games'),
+        Groups([
+            'read:item',
+        ]),
+    ]
     protected ?Collection $streams = null;
 
     public function __construct()
@@ -35,6 +85,13 @@ class Game
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getName(): ?string

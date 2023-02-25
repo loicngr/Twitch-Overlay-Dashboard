@@ -29,11 +29,11 @@ final class Version20230225144606 extends AbstractMigration
         $this->addSql(
             'CREATE TABLE stream (
                     id INT AUTO_INCREMENT NOT NULL,
-                    user_id_id INT NOT NULL,
+                    user_id INT NOT NULL,
                     type INT NOT NULL,
                     title VARCHAR(255) NOT NULL,
                     start_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-                    INDEX IDX_F0E9BE1C9D86650F (user_id_id),
+                    INDEX IDX_F0E9BE1CA76ED395 (user_id),
                     PRIMARY KEY(id)
                  ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB',
         );
@@ -74,7 +74,7 @@ final class Version20230225144606 extends AbstractMigration
         );
 
         $this->addSql(
-            'ALTER TABLE stream ADD CONSTRAINT FK_F0E9BE1C9D86650F FOREIGN KEY (user_id_id) REFERENCES user (id)',
+            'ALTER TABLE stream ADD CONSTRAINT FK_F0E9BE1C9D86650F FOREIGN KEY (user_id) REFERENCES user (id)',
         );
 
         $this->addSql(

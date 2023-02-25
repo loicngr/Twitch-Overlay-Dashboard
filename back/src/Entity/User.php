@@ -2,43 +2,120 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[
+    ORM\Entity(repositoryClass: UserRepository::class),
+    ApiResource,
+    Get(
+        normalizationContext: [
+            'groups' => [
+                'read:item',
+            ],
+        ],
+    ),
+    GetCollection(
+        normalizationContext: [
+            'groups' => [
+                'read:collection',
+            ],
+        ],
+    ),
+]
 class User
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[
+        ORM\Id,
+        ORM\Column,
+        ORM\GeneratedValue,
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[
+        ORM\Column(length: 255),
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?string $login = null;
 
-    #[ORM\Column(length: 255)]
+    #[
+        ORM\Column(length: 255),
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?string $displayName = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[
+        ORM\Column(type: Types::TEXT, nullable: true),
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?string $description = null;
 
-    #[ORM\Column(length: 255)]
+    #[
+        ORM\Column(length: 255),
+        Assert\NotBlank,
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?string $email = null;
 
-    #[ORM\Column]
+    #[
+        ORM\Column,
+        Assert\NotNull,
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(nullable: true)]
+    #[
+        ORM\Column(nullable: true),
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?int $viewCount = null;
 
-    #[ORM\Column(length: 300, nullable: true)]
+    #[
+        ORM\Column(length: 300, nullable: true),
+        Groups([
+            'read:collection',
+            'read:item',
+        ]),
+    ]
     protected ?string $profilePicture = null;
 
-    #[ORM\OneToMany(mappedBy: 'userId', targetEntity: Stream::class, orphanRemoval: true)]
+    #[
+        ORM\OneToMany(mappedBy: 'userId', targetEntity: Stream::class, orphanRemoval: true),
+        Groups([
+            'read:item',
+        ]),
+    ]
     protected ?Collection $streams = null;
 
     public function __construct()
@@ -49,6 +126,13 @@ class User
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getLogin(): ?string
@@ -147,7 +231,7 @@ class User
     {
         if (!$this->streams->contains($stream)) {
             $this->streams->add($stream);
-            $stream->setUserId($this);
+            $stream->setUser($this);
         }
 
         return $this;
@@ -157,8 +241,8 @@ class User
     {
         if ($this->streams->removeElement($stream)) {
             // set the owning side to null (unless already changed)
-            if ($stream->getUserId() === $this) {
-                $stream->setUserId(null);
+            if ($stream->getUser() === $this) {
+                $stream->setUser(null);
             }
         }
 

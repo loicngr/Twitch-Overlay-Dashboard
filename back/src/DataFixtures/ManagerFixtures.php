@@ -14,6 +14,9 @@ class ManagerFixtures extends Fixture
     ) {
     }
 
+    /** @var int */
+    final public const MANAGER1_REFERENCE = 1;
+
     public function load(ObjectManager $manager): void
     {
         $myManager = (new Manager())
@@ -27,5 +30,7 @@ class ManagerFixtures extends Fixture
 
         $manager->persist($myManager);
         $manager->flush();
+
+        $this->addReference(self::MANAGER1_REFERENCE, $myManager);
     }
 }

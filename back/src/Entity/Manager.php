@@ -2,12 +2,25 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
 use App\Repository\ManagerRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: ManagerRepository::class)]
+#[
+    ORM\Entity(repositoryClass: ManagerRepository::class),
+    ApiResource,
+    Get(
+        normalizationContext: [
+            'groups' => [
+                'read:item',
+            ],
+        ],
+    ),
+]
 class Manager implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /** @var string */
@@ -16,19 +29,19 @@ class Manager implements UserInterface, PasswordAuthenticatedUserInterface
     /** @var string */
     final public const ROLE_ADMIN = 'TOLE_ADMIN';
 
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Id, ORM\Column, ORM\GeneratedValue]
+    protected ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    private ?string $email = null;
+    #[Assert\NotBlank]
+    protected ?string $email = null;
 
     #[ORM\Column]
-    private array $roles = [];
+    protected array $roles = [];
 
     #[ORM\Column]
-    private ?string $password = null;
+    #[Assert\NotBlank]
+    protected ?string $password = null;
 
     public function getId(): ?int
     {

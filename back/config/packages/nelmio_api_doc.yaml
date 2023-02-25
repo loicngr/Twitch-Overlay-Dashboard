@@ -1,0 +1,18 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: '%env(string:TW_APPLICATION_NAME)%'
+            description: 'Documentation de %env(string:TW_APPLICATION_NAME)%'
+            version: '%env(string:TW_APPLICATION_VERSION)%'
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+        security:
+            - Bearer: []
+    areas: # to filter documented areas
+        default:
+            path_patterns:
+                - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
