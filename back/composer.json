@@ -38,11 +38,11 @@
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.4",
-        "liuggio/fastest": "^1.10",
         "phpunit/phpcov": "^9.0",
         "phpunit/phpunit": "^10.0",
         "symfony/browser-kit": "6.2.*",
         "symfony/css-selector": "6.2.*",
+        "symfony/http-client": "6.2.*",
         "symfony/maker-bundle": "^1.48",
         "symfony/phpunit-bridge": "^6.2",
         "symfony/stopwatch": "6.2.*",

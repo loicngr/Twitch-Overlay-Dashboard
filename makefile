@@ -20,6 +20,14 @@ back-fixer:
 	@cd $(FOLDER_BACK) && \
 	./vendor/bin/php-cs-fixer fix src --show-progress=dots
 
+back-reset-test:
+	@cd $(FOLDER_BACK) && \
+	bin/console d:d:d --force --env=test && \
+	bin/console d:d:c --env=test && \
+	php bin/console --env=test d:s:create && \
+	cd .. && \
+	make back-load-test-fixtures
+
 back-reset:
 	@cd $(FOLDER_BACK) && \
 	bin/console d:d:d --force && \
@@ -30,6 +38,9 @@ back-reset:
 
 back-load-fixtures:
 	@cd $(FOLDER_BACK) && bin/console d:f:load
+
+back-load-test-fixtures:
+	@cd $(FOLDER_BACK) && bin/console --env=test doctrine:fixtures:load -q
 
 back-serve:
 	@cd $(FOLDER_BACK) && symfony serve --no-tls

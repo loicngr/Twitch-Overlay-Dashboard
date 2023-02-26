@@ -1,12 +1,3 @@
-parameters:
-    doctrine.dbal.connection_factory.class: Liuggio\Fastest\Doctrine\DBAL\ConnectionFactory
-
 doctrine:
     dbal:
-        driver: pdo_sqlite
-        user: "root"
-        dbname: "test"
-        password: "password"
-        path: "%kernel.cache_dir%/__DBNAME__.db"
-        charset: UTF8
-        url: null
+        logging: false
