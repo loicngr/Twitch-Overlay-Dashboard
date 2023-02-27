@@ -6,6 +6,8 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 /**
@@ -13,12 +15,14 @@ use Throwable;
  */
 trait Mixin
 {
+    public ?Client $client = null;
+
     public static array $LOGIN_MANAGER1 = [
         'email' => 'manager@email.local',
         'password' => 'azerty',
     ];
 
-    public static function logIn(
+    public function logIn(
         ?string $email = null,
         ?string $password = null,
     ): Client {
@@ -52,7 +56,40 @@ trait Mixin
             self::fail($exception->getMessage());
         }
 
+        $this->client = $client;
+
         return $client;
+    }
+
+    /**
+     * Proxy get method.
+     */
+    public function get(string $path): void
+    {
+        try {
+            $this->client->request(Request::METHOD_GET, $path);
+        } catch (Throwable $throwable) {
+            self::fail($throwable->getMessage());
+        }
+    }
+
+    /**
+     * Proxy post method.
+     */
+    public function post(string $path, array $options): void
+    {
+        try {
+            $this->client->request(Request::METHOD_POST, $path, $options);
+        } catch (Throwable $throwable) {
+            self::fail($throwable->getMessage());
+        }
+    }
+
+    public function assertAuthRequired(string $path, string $method = Request::METHOD_GET): void
+    {
+        $client = static::createClient();
+        $client->request($method, $path);
+        self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
     }
 
     public function getUserById(int $id): ?User

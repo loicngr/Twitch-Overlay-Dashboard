@@ -6,12 +6,15 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use App\Repository\UserRepository;
+use App\Utils\Constants\Variables;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Context;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[
@@ -85,6 +88,7 @@ class User
     #[
         ORM\Column,
         Assert\NotNull,
+        Context([DateTimeNormalizer::FORMAT_KEY => Variables::DATE_SERVER]),
         Groups([
             'read:collection',
             'read:item',

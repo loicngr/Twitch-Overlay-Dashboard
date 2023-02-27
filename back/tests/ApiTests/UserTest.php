@@ -20,9 +20,11 @@ class UserTest extends ApiTestCase
      */
     public function testSomething(): void
     {
-        $client = self::logIn();
+        $path = '/users';
+        self::assertAuthRequired($path);
 
-        $client->request('GET', '/users');
+        $this->logIn();
+        $this->get($path);
         $this->assertResponseIsSuccessful();
 
         $user1 = self::getUserById(1);
@@ -32,11 +34,11 @@ class UserTest extends ApiTestCase
             'displayName' => 'User1',
             'description' => 'description',
             'email' => 'user1@email.local',
-            'createdAt' => $user1->getCreatedAt()->format(Variables::DATE_TIME_SERVER) . '+00:00',
+            'createdAt' => $user1->getCreatedAt()->format(Variables::DATE_SERVER),
             'viewCount' => 0,
         ];
 
-        $this->assertJsonContains([
+        $this->assertJsonEquals([
             $expectedUser1,
         ]);
     }
