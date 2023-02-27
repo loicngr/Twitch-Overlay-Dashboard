@@ -17,6 +17,5 @@ jobs:
         with:
           version: "10.0.12"
           php_version: "8.1"
-          vendored_phpunit_path: "back/vendor/bin/phpunit"
           configuration: "back/phpunit.xml.dist"
           memory_limit: "256M"
