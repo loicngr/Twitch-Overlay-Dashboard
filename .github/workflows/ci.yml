@@ -13,6 +13,8 @@ jobs:
         with:
           php_version: "8.1"
           working_dir: "back"
+      - name: Shutdown Ubuntu MySQL (SUDO)
+        run: sudo service mysql stop
       - uses: getong/mariadb-action@v1.1
         with:
           character set server: 'utf8mb4'
@@ -21,8 +23,10 @@ jobs:
           mysql password: password
           mysql root password: password
           mysql database: test
+      - name: Start Ubuntu MySQL (SUDO)
+        run: sudo service mysql start
       - name: Setup tests
-        run: make back-reset-test
+        run: "cd back && php bin/console --env=test d:s:create && php bin/console d:f:load"
       - name: Tests
         uses: php-actions/phpunit@v3
         with:
