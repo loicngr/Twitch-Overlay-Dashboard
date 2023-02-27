@@ -21,12 +21,6 @@ jobs:
           mysql password: password
           mysql root password: password
           mysql database: test
-      - name: Start Ubuntu MySQL (SUDO)
-        run: |
-          sudo /lib/systemd/systemd-sysv-install enable mysql
-          sudo systemctl enable mysql.service
-          sudo systemctl start mysql.service
-          sudo systemctl status mysql.service
       - name: Setup tests
         run: "cd back && php bin/console --env=test d:s:create && php bin/console d:f:load"
       - name: Tests
