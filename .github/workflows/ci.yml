@@ -15,11 +15,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        working-directory: ./back
 
       - name: Setup PHP
         uses: shivammathur/setup-php@verbose
-        working-directory: ./back
         with:
           php-version: ${{ matrix.php-versions }}
           # extensions: mbstring, xml, ctype, iconv, intl, dom, filter, gd, iconv, json, mbstring, pdo
