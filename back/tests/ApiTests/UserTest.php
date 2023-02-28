@@ -18,7 +18,7 @@ class UserTest extends ApiTestCase
     /**
      * @throws Throwable
      */
-    public function testSomething(): void
+    public function testFetchUsers(): void
     {
         $path = '/users';
         self::assertAuthRequired($path);
