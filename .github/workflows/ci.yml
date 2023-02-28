@@ -48,6 +48,7 @@ jobs:
       - name: Run Migration
         run: |
           composer require --dev symfony/orm-pack
+          bin/console lexik:jwt:generate-keypair
           php bin/console --env=test d:m:m -n -q
           php bin/console --env=test d:f:load -q -n
         working-directory: ./back
