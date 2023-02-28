@@ -55,9 +55,5 @@ jobs:
           DATABASE_URL: "mysql://root:password@127.0.0.1:${{ job.services.mysql.ports['3306'] }}/test"
 
       - name: Tests
-        uses: php-actions/phpunit@v3
-        with:
-          version: "10.0.12"
-          php_version: "8.1"
-          configuration: "back/phpunit.xml.dist"
-          memory_limit: "256M"
+        run: ./vendor/phpunit/phpunit/phpunit -c ./phpunit.xml.dist
+        working-directory: ./back
