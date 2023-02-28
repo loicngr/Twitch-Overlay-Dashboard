@@ -60,6 +60,8 @@ jobs:
       - name: Run Migration
         run: |
           composer require --dev symfony/orm-pack
+          php bin/console --env=test d:d:d --force
+          php bin/console --env=test d:d:c
           php bin/console --env=test d:s:create || echo "No migrations found or schema update failed"
           php bin/console --env=test d:m:m || echo "No migrations found or migration failed"
           php bin/console --env=test d:f:load
