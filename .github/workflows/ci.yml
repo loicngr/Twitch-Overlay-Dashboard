@@ -11,7 +11,7 @@ jobs:
 
     services:
       mysql:
-        image: mariadb:latest
+        image: mariadb:10.6.12
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: false
           MYSQL_ROOT_PASSWORD: password
@@ -60,11 +60,17 @@ jobs:
       - name: Run Migration
         run: |
           composer require --dev symfony/orm-pack
-          php bin/console --env=test doctrine:schema:update --force || echo "No migrations found or schema update failed"
-          php bin/console --env=test doctrine:migrations:migrate || echo "No migrations found or migration failed"
+          php bin/console --env=test d:s:create || echo "No migrations found or schema update failed"
+          php bin/console --env=test d:m:m || echo "No migrations found or migration failed"
+          php bin/console --env=test d:f:load
         working-directory: ./back
         env:
-          DATABASE_URL: mysql://root:password@127.0.0.1:${{ job.services.mysql.ports['3306'] }}/test
+          DATABASE_HOST: localhost
+          DATABASE_USER: root
+          DATABASE_PASSWORD: password
+          DATABASE_NAME: test
+          DATABASE_CHARSET: utf8mb4
+          DATABASE_SERVER_VERSION: mariadb-10.6.12
 
       - name: Install PHPUnit
         run: simple-phpunit install
