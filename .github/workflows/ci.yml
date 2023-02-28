@@ -55,5 +55,7 @@ jobs:
           DATABASE_URL: "mysql://root:password@127.0.0.1:${{ job.services.mysql.ports['3306'] }}/test"
 
       - name: Tests
-        run: ./vendor/phpunit/phpunit/phpunit -c ./phpunit.xml.dist
+        run: ./vendor/phpunit/phpunit/phpunit -c ./phpunit.xml.dist --stop-on-failure
         working-directory: ./back
+        env:
+          DATABASE_URL: "mysql://root:password@127.0.0.1:${{ job.services.mysql.ports['3306'] }}/test"
