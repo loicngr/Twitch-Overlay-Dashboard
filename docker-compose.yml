@@ -1,0 +1,39 @@
+services:
+  mariadb:
+    image: mariadb:10.6.12
+    container_name: mariadb
+    restart: unless-stopped
+    command: '--default-authentication-plugin=mysql_native_password'
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: app
+      MYSQL_PASSWORD: password
+
+  back:
+    container_name: back
+    environment:
+      DATABASE_HOST: mariadb
+      DATABASE_USER: root
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: app
+      DATABASE_SERVER_VERSION: mariadb-10.6.12
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    volumes:
+      - "./back/.env.dev.local:/code/.env.dev.local"
+    depends_on:
+      - mariadb
+    links:
+      - mariadb
+
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    volumes:
+      - "./front/dist/pwa:/code/dist/pwa"
+    depends_on:
+      - back
+    links:
+      - back
