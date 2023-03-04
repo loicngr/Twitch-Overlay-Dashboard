@@ -1,4 +1,4 @@
 security:
-    password_hashers:
-        App\Entity\Manager:
-            algorithm: plaintext
+  password_hashers:
+    App\Entity\Manager:
+      algorithm: plaintext
