@@ -1,1 +1,7 @@
-// app global css in SCSS form
+:root {
+  --core-toolbar-height: 50px;
+}
+
+*, *::after, *::before {
+  box-sizing: border-box !important;
+}

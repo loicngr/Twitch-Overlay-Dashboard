@@ -3,6 +3,11 @@ parameters:
   locale: fr
   application:
     version: "%env(TW_APPLICATION_VERSION)%"
+    oauth:
+      twitch:
+        redirectUrl: "%env(TWITCH_OAUTH_REDIRECT_URL)%"
+        clientId: "%env(TWITCH_OAUTH_CLIENT_ID)%"
+        secret: "%env(TWITCH_OAUTH_SECRET)%"
     url:
       api: "%env(TW_BACK_URL)%"
       front: "%env(TW_FRONT_URL)%"
@@ -16,7 +21,7 @@ services:
     public: false
 
     bind:
-      #            $env: '%kernel.environment%'
+      # $env: '%kernel.environment%'
       $application: '%application%'
       $appVersion: '%env(TW_APPLICATION_VERSION)%'
 

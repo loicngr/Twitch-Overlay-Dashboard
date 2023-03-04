@@ -21,4 +21,10 @@ class Variables
 
     /** @var string */
     final public const TIME_FR = 'H\hi';
+
+    /** @var string */
+    final public const TWITCH_BASE_URL = 'https://id.twitch.tv';
+
+    /** @var string */
+    final public const OAUTH_TWITCH_BASE_URL = self::TWITCH_BASE_URL . '/oauth2';
 }

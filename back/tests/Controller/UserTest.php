@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Tests\ApiTests;
+namespace App\Tests\Controller;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Entity\Stream;
+use App\Tests\MainMixin;
 use App\Utils\Constants\Variables;
 use Throwable;
 
@@ -14,7 +15,7 @@ use Throwable;
  */
 class UserTest extends ApiTestCase
 {
-    use Mixin;
+    use MainMixin;
 
     /**
      * @throws Throwable
@@ -28,7 +29,7 @@ class UserTest extends ApiTestCase
         $this->get($path);
         $this->assertResponseIsSuccessful();
 
-        $user1 = self::getUserById(1);
+        $user1 = $this->getUserById(1);
         $expectedUser1 = [
             'id' => 1,
             'login' => 'user1',
@@ -56,7 +57,7 @@ class UserTest extends ApiTestCase
         $this->get($path);
         $this->assertResponseIsSuccessful();
 
-        $user1 = self::getUserById(1);
+        $user1 = $this->getUserById(1);
         $expectedUser1 = [
             'id' => 1,
             'login' => 'user1',
@@ -114,5 +115,45 @@ class UserTest extends ApiTestCase
         ];
 
         $this->assertJsonEquals($expectedUser);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function testUpdateUser(): void
+    {
+        $path = '/users/1';
+        self::assertAuthRequired($path);
+
+        $this->logIn();
+
+        $options = [
+            'viewCount' => 500,
+        ];
+
+        $this->patch($path, $options);
+        $this->assertResponseIsSuccessful();
+
+        $user1 = $this->getUserById(1);
+        $expectedUser1 = [
+            'id' => 1,
+            'login' => 'user1',
+            'displayName' => 'User1',
+            'description' => 'description',
+            'email' => 'user1@email.local',
+            'createdAt' => $user1->getCreatedAt()->format(Variables::DATE_SERVER),
+            'viewCount' => 500,
+            'streams' => [
+                [
+                    'id' => 1,
+                    'type' => Stream::TYPE_LIVE,
+                    'title' => 'Stream du matin 1',
+                    'startAt' => '2022-01-01T08:00:00',
+                    'games' => [],
+                ],
+            ],
+        ];
+
+        $this->assertJsonEquals($expectedUser1);
     }
 }

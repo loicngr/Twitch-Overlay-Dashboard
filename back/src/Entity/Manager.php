@@ -194,7 +194,10 @@ class Manager implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getManagerSettingsFeature(): ManagerSettingsFeature
     {
-        return $this->managerSettingsFeature ?? new ManagerSettingsFeature();
+        return
+            $this->managerSettingsFeature ?? (new ManagerSettingsFeature())
+                ->setManager($this)
+        ;
     }
 
     public function setManagerSettingsFeature(

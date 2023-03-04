@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Tests\ApiTests;
+namespace App\Tests;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Symfony\Bundle\Test\Client;
+use App\Entity\Manager;
 use App\Entity\User;
+use App\Repository\ManagerRepository;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Process;
@@ -14,7 +17,7 @@ use Throwable;
 /**
  * @extends ApiTestCase
  */
-trait Mixin
+trait MainMixin
 {
     public ?Client $client = null;
 
@@ -31,7 +34,14 @@ trait Mixin
 
     protected function tearDown(): void
     {
+        // Drop database and reset fixtures between each tests
+        // I think is it not a good way to do it, but for now it's work.
         self::resetDatabase();
+    }
+
+    public function getEm(): EntityManagerInterface
+    {
+        return $this->client->getKernel()->getContainer()->get('doctrine')->getManager();
     }
 
     public function logIn(
@@ -102,8 +112,28 @@ trait Mixin
         }
     }
 
-    public function assertAuthRequired(string $path, string $method = Request::METHOD_GET): void
+    /**
+     * Proxy patch method.
+     */
+    public function patch(string $path, array $json): void
     {
+        try {
+            $this->client->request(Request::METHOD_PATCH, $path, [
+                'headers' => [
+                    'accept' => 'application/json',
+                    'Content-Type' => 'application/merge-patch+json',
+                ],
+                'json' => $json,
+            ]);
+        } catch (Throwable $throwable) {
+            self::fail($throwable->getMessage());
+        }
+    }
+
+    public static function assertAuthRequired(
+        string $path,
+        string $method = Request::METHOD_GET,
+    ): void {
         $client = static::createClient();
         $client->request($method, $path);
         self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
@@ -111,8 +141,23 @@ trait Mixin
 
     public function getUserById(int $id): ?User
     {
-        $userRp = static::getContainer()->get(UserRepository::class);
+        $em = $this->getEm();
+        $em->clear();
 
-        return $userRp->find($id);
+        /** @var UserRepository $rpUser */
+        $rpUser = $em->getRepository(User::class);
+
+        return $rpUser->find($id);
+    }
+
+    public function getManagerById(int $id): ?Manager
+    {
+        $em = $this->getEm();
+        $em->clear();
+
+        /** @var ManagerRepository $rpManager */
+        $rpManager = $em->getRepository(Manager::class);
+
+        return $rpManager->find($id);
     }
 }
