@@ -18,7 +18,7 @@ final class Version20230225144606 extends AbstractMigration
     {
         $this->addSql(
             'CREATE TABLE game (
-                    id INT AUTO_INCREMENT NOT NULL,
+                    id INT NOT NULL,
                     name VARCHAR(255) NOT NULL,
                     picture VARCHAR(300) NOT NULL,
                     igdb_id INT DEFAULT NULL,
@@ -28,7 +28,7 @@ final class Version20230225144606 extends AbstractMigration
 
         $this->addSql(
             'CREATE TABLE stream (
-                    id INT AUTO_INCREMENT NOT NULL,
+                    id INT NOT NULL,
                     user_id INT NOT NULL,
                     type INT NOT NULL,
                     title VARCHAR(255) NOT NULL,
@@ -50,7 +50,7 @@ final class Version20230225144606 extends AbstractMigration
 
         $this->addSql(
             'CREATE TABLE user (
-                    id INT AUTO_INCREMENT NOT NULL,
+                    id INT NOT NULL,
                     login VARCHAR(255) NOT NULL,
                     display_name VARCHAR(255) NOT NULL,
                     description LONGTEXT DEFAULT NULL,
