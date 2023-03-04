@@ -24,6 +24,7 @@
         "symfony/expression-language": "6.2.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "6.2.*",
+        "symfony/process": "6.2.*",
         "symfony/property-access": "6.2.*",
         "symfony/property-info": "6.2.*",
         "symfony/runtime": "6.2.*",
@@ -76,6 +77,9 @@
         "symfony/polyfill-php81": "*"
     },
     "scripts": {
+        "tests-reset": [
+            "bin/console d:d:d --force --env=test -q && bin/console d:d:c --env=test -q && php bin/console --env=test d:s:create -n -q && bin/console --env=test doctrine:fixtures:load -q -n"
+        ],
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd"

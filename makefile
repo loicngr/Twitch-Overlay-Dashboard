@@ -15,7 +15,7 @@ check:
 #########################################
 ################ BACKEND ################
 #########################################
-back-tests:
+back-tests: back-reset-test
 	@cd $(FOLDER_BACK) && \
 	./vendor/phpunit/phpunit/phpunit -c ./phpunit.xml.dist
 
@@ -25,11 +25,7 @@ back-fixer:
 
 back-reset-test:
 	@cd $(FOLDER_BACK) && \
-	bin/console d:d:d --force --env=test && \
-	bin/console d:d:c --env=test && \
-	php bin/console --env=test d:s:create && \
-	cd .. && \
-	make back-load-test-fixtures
+	composer tests-reset
 
 back-reset:
 	@cd $(FOLDER_BACK) && \
@@ -43,7 +39,7 @@ back-load-fixtures:
 	@cd $(FOLDER_BACK) && bin/console d:f:load
 
 back-load-test-fixtures:
-	@cd $(FOLDER_BACK) && bin/console --env=test doctrine:fixtures:load -q
+	@cd $(FOLDER_BACK) && bin/console --env=test doctrine:fixtures:load -q -n
 
 back-serve:
 	@cd $(FOLDER_BACK) && symfony serve --no-tls

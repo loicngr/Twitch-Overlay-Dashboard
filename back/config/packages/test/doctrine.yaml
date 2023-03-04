@@ -1,4 +1,4 @@
 doctrine:
-    dbal:
-        url: '%env(resolve:DATABASE_URL)%'
-        logging: false
+  dbal:
+    url: '%env(resolve:DATABASE_URL)%'
+    logging: false

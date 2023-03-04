@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\StreamRepository;
 use App\Utils\Constants\Variables;
 use DateTimeImmutable;
@@ -15,84 +17,108 @@ use Symfony\Component\Serializer\Annotation\Context;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
-#[
-    ORM\Entity(repositoryClass: StreamRepository::class),
-    ApiResource,
-    Get(
-        normalizationContext: [
-            'groups' => [
-                'read:item',
+#[ORM\Entity(repositoryClass: StreamRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection(
+            normalizationContext: [
+                'groups' => [
+                    'stream:read:collection',
+                ],
             ],
-        ],
-    ),
-    GetCollection(
-        normalizationContext: [
-            'groups' => [
-                'read:collection',
+        ),
+        new Post(
+            validationContext: [
+                'groups' => [
+                    'Default',
+                    'game:create:item',
+                ],
             ],
+        ),
+        new Patch(),
+    ],
+    normalizationContext: [
+        'groups' => [
+            'stream:read:item',
         ],
-    ),
-]
+    ],
+    denormalizationContext: [
+        'groups' => [
+            'stream:create:item',
+            'stream:update:item',
+        ],
+    ],
+)]
 class Stream
 {
     /** @var int */
     final public const TYPE_LIVE = 1;
 
-    #[
-        ORM\Id,
-        ORM\GeneratedValue,
-        ORM\Column,
-        Groups([
-            'read:collection',
-            'read:item',
-        ]),
-    ]
+    #[ORM\Id]
+    #[ORM\Column]
+    #[Groups([
+        'stream:read:collection',
+        'stream:read:item',
+        'stream:create:item',
+        'user:read:item',
+        'game:read:item',
+    ])]
     protected ?int $id = null;
 
-    #[
-        ORM\ManyToOne(inversedBy: 'streams'),
-        ORM\JoinColumn(nullable: false),
-        Groups([
-            'read:item',
-        ]),
-    ]
-    protected ?User $user = null;
-
-    #[
-        ORM\Column,
-        Groups([
-            'read:collection',
-            'read:item',
-        ]),
-    ]
+    #[ORM\Column]
+    #[Groups([
+        'stream:read:collection',
+        'stream:read:item',
+        'stream:create:item',
+        'stream:update:item',
+        'user:read:item',
+        'game:read:item',
+    ])]
     protected ?int $type = null;
 
-    #[
-        ORM\Column(length: 255),
-        Groups([
-            'read:collection',
-            'read:item',
-        ]),
-    ]
+    #[ORM\Column(length: 255)]
+    #[Groups([
+        'stream:read:collection',
+        'stream:read:item',
+        'stream:create:item',
+        'stream:update:item',
+        'user:read:item',
+        'game:read:item',
+    ])]
     protected ?string $title = null;
 
-    #[
-        ORM\Column,
-        Context([DateTimeNormalizer::FORMAT_KEY => Variables::DATE_TIME_SERVER]),
-        Groups([
-            'read:collection',
-            'read:item',
-        ]),
-    ]
+    #[ORM\Column]
+    #[Context([
+        DateTimeNormalizer::FORMAT_KEY => Variables::DATE_TIME_SERVER,
+    ])]
+    #[Groups([
+        'stream:read:collection',
+        'stream:read:item',
+        'stream:create:item',
+        'user:read:item',
+        'game:read:item',
+    ])]
     protected ?DateTimeImmutable $startAt = null;
 
-    #[
-        ORM\ManyToMany(targetEntity: Game::class, inversedBy: 'streams'),
-        Groups([
-            'read:item',
-        ]),
-    ]
+    #[ORM\ManyToMany(
+        targetEntity: Game::class,
+        inversedBy: 'streams',
+    )]
+    #[Groups([
+        'stream:read:item',
+        'user:read:item',
+    ])]
     protected ?Collection $games = null;
+
+    #[ORM\ManyToOne(inversedBy: 'streams')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups([
+        'stream:read:item',
+        'stream:create:item',
+        'game:read:item',
+    ])]
+    protected ?User $user = null;
 
     public function __construct()
     {
@@ -104,21 +130,9 @@ class Stream
         return $this->id;
     }
 
-    public function setId(int $id): self
+    public function setId(int $id): static
     {
         $this->id = $id;
-
-        return $this;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
 
         return $this;
     }
@@ -128,7 +142,7 @@ class Stream
         return $this->type;
     }
 
-    public function setType(int $type): self
+    public function setType(int $type): static
     {
         $this->type = $type;
 
@@ -140,7 +154,7 @@ class Stream
         return $this->title;
     }
 
-    public function setTitle(string $title): self
+    public function setTitle(string $title): static
     {
         $this->title = $title;
 
@@ -152,7 +166,7 @@ class Stream
         return $this->startAt;
     }
 
-    public function setStartAt(DateTimeImmutable $startAt): self
+    public function setStartAt(DateTimeImmutable $startAt): static
     {
         $this->startAt = $startAt;
 
@@ -167,7 +181,7 @@ class Stream
         return $this->games ??= new ArrayCollection();
     }
 
-    public function addGame(Game $game): self
+    public function addGame(Game $game): static
     {
         if (!$this->games->contains($game)) {
             $this->games->add($game);
@@ -176,9 +190,21 @@ class Stream
         return $this;
     }
 
-    public function removeGame(Game $game): self
+    public function removeGame(Game $game): static
     {
         $this->games->removeElement($game);
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }
