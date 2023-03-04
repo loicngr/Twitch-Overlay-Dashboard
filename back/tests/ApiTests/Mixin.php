@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Process\Process;
 use Throwable;
 
 /**
@@ -21,6 +22,17 @@ trait Mixin
         'email' => 'manager@email.local',
         'password' => 'azerty',
     ];
+
+    private static function resetDatabase(): void
+    {
+        $process = new Process(['composer', 'tests-reset']);
+        $process->run();
+    }
+
+    protected function tearDown(): void
+    {
+        self::resetDatabase();
+    }
 
     public function logIn(
         ?string $email = null,
@@ -50,7 +62,10 @@ trait Mixin
 
             $client->setDefaultOptions([
                 'auth_bearer' => $data['token'],
-                'headers' => ['accept' => 'application/json'],
+                'headers' => [
+                    'accept' => 'application/json',
+                    'Content-Type' => 'application/ld+json',
+                ],
             ]);
         } catch (Throwable $exception) {
             self::fail($exception->getMessage());
@@ -76,10 +91,12 @@ trait Mixin
     /**
      * Proxy post method.
      */
-    public function post(string $path, array $options): void
+    public function post(string $path, array $json): void
     {
         try {
-            $this->client->request(Request::METHOD_POST, $path, $options);
+            $this->client->request(Request::METHOD_POST, $path, [
+                'json' => $json,
+            ]);
         } catch (Throwable $throwable) {
             self::fail($throwable->getMessage());
         }

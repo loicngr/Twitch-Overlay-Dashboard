@@ -115,6 +115,7 @@ class Stream
     #[ORM\JoinColumn(nullable: false)]
     #[Groups([
         'stream:read:item',
+        'stream:create:item',
         'game:read:item',
     ])]
     protected ?User $user = null;
