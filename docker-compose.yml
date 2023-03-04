@@ -20,8 +20,6 @@ services:
     build:
       context: ./back
       dockerfile: Dockerfile
-    volumes:
-      - "./back/.env.dev.local:/code/.env.dev.local"
     depends_on:
       - mariadb
     links:

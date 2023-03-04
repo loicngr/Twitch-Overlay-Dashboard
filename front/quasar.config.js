@@ -62,7 +62,10 @@ const _loopOverObject = (obj) => {
 const _getConfigOrThrow = (_path) => _loopOverObject(_.get(appConfig, _path, {}))
 
 module.exports = configure(function (/* ctx */) {
-  const { APP } = _getConfigOrThrow(['APP'])
+  const { APP } = {
+    APP: { ..._getConfigOrThrow(['APP']) }
+  }
+
   const APP_SIMPLE_NAME = APP.name.toLowerCase()
 
   return {

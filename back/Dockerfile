@@ -33,13 +33,12 @@ RUN chmod +x /usr/local/bin/docker-healthcheck
 
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
 
-RUN ln -s $PHP_INI_DIR/php.ini-production $PHP_INI_DIR/php.ini
-COPY docker/conf.d/symfony.prod.ini $PHP_INI_DIR/conf.d/symfony.ini
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY --link docker/conf.d/app.ini $PHP_INI_DIR/conf.d/
+COPY --link docker/conf.d/app.prod.ini $PHP_INI_DIR/conf.d/
+COPY --link docker/php-fpm.d/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 
-COPY docker/php-fpm.d/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
-
-RUN apt-get install -y \
-        nginx;
+RUN apt-get install -y nginx
 
 ADD docker/nginx/prod.conf /etc/nginx/sites-enabled/default
 
@@ -69,14 +68,12 @@ COPY config config
 
 VOLUME /code/var
 
-COPY docker/entrypoint.sh /usr/local/bin/docker-entrypoint
+COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
 ENTRYPOINT ["docker-entrypoint"]
 CMD ["php-fpm"]
 
 EXPOSE 80
-
-COPY docker/conf.d/php.prod.ini $PHP_INI_DIR/conf.d/php.prod.ini
 
 COPY . .
 
@@ -84,7 +81,9 @@ COPY . .
 RUN set -eux; \
   mkdir -p var/cache var/log; \
   composer install --prefer-dist --no-dev --no-progress --no-scripts --no-interaction; \
-  composer dump-autoload --classmap-authoritative --no-dev; \
-  composer run-script --no-dev post-install-cmd; \
+#  composer dump-autoload --classmap-authoritative --no-dev; \
+#  composer run-script --no-dev post-install-cmd; \
   composer clear-cache; \
   chmod +x bin/console; sync
+
+CMD ["nginx", "-g", "daemon off;"]

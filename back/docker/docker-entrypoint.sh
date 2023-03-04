@@ -35,17 +35,9 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 			echo "The db is now ready and reachable"
 		fi
 
-    if [ ! "$2" = 'doctrine:migration:migrate' ]; then
-		  SCHEMA_UP_TO_DATE=20
-      until [ $SCHEMA_UP_TO_DATE -eq 0 ] || bin/console doctrine:migration:up-to-date --env "$APP_ENV" 2>&1; do
-        sleep 4
-        SCHEMA_UP_TO_DATE=$((SCHEMA_UP_TO_DATE - 1))
-      done
-      if [ $SCHEMA_UP_TO_DATE -eq 0 ]; then
-        echo "The schema is not up to date (timeout)"
-        exit 1
-      fi
-    fi
+		if [ "$( find ./migrations -iname '*.php' -print -quit )" ]; then
+			bin/console doctrine:migrations:migrate --no-interaction
+		fi
 	fi
 
 	echo "Fix ACL"

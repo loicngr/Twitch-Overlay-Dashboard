@@ -5,6 +5,9 @@ APP_NAME=twitchOverlay
 ########################################
 ################ COMMON ################
 ########################################
+docker-clear:
+	docker compose down --remove-orphans --rmi "local" -v
+
 check:
 	@make front-fixer && \
 	make back-fixer
