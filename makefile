@@ -1,6 +1,7 @@
 FOLDER_BACK=./back
 FOLDER_FRONT=./front
 APP_NAME=twitchOverlay
+APP_VERSION=0.0.1
 
 ########################################
 ################ COMMON ################
