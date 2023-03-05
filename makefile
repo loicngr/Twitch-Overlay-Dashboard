@@ -10,14 +10,17 @@ docker-fix-chown:
 	docker compose run --rm php chown -R $(id -u):$(id -g) .
 
 docker-prune:
-	@docker compose down --remove-orphans && \
+	@cd $(FOLDER_BACK) && \
+	docker compose down --remove-orphans && \
 	docker system prune -a -f --volumes && \
 	docker volume rm $(docker volume ls -q)
 
 docker-build-prod:
-	@docker compose build --pull --no-cache
+	@cd $(FOLDER_BACK) && \
+	docker compose build --pull --no-cache
 
 docker-clear:
+	@cd $(FOLDER_BACK) && \
 	docker compose down --remove-orphans --rmi "local" -v
 
 check:
