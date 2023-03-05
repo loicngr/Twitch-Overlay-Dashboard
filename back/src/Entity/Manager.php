@@ -59,7 +59,7 @@ class Manager implements UserInterface, PasswordAuthenticatedUserInterface
     final public const ROLE_USER = 'ROLE_USER';
 
     /** @var string */
-    final public const ROLE_ADMIN = 'TOLE_ADMIN';
+    final public const ROLE_ADMIN = 'ROLE_ADMIN';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

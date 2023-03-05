@@ -126,7 +126,10 @@ class OAuthController extends BaseController
             $statusCode = $response->getStatusCode();
 
             if (Response::HTTP_OK !== $statusCode) {
-                return $cbError('Redirection flow error');
+                $this->logger->warning($response->getContent());
+                $this->logger->warning($statusCode);
+
+                return $cbError('Redirection flow error status');
             }
 
             $content = $response->toArray();
