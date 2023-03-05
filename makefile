@@ -9,6 +9,11 @@ APP_VERSION=0.0.1
 docker-fix-chown:
 	docker compose run --rm php chown -R $(id -u):$(id -g) .
 
+docker-prune:
+	@docker compose down --remove-orphans && \
+	docker system prune -a -f --volumes && \
+	docker volume rm $(docker volume ls -q)
+
 docker-clear:
 	docker compose down --remove-orphans --rmi "local" -v
 
