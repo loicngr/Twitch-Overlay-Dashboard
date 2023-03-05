@@ -3,75 +3,14 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 const { configure } = require('quasar/wrappers')
-const _ = require('lodash')
-const fs = require('fs')
 
-const APP_ENV = process.env.APP_ENV || (
-  process.env.NODE_ENV === 'development'
-    ? 'dev'
-    : 'prod'
-)
-
-const sConfigFile = `./config.${APP_ENV}.js`
-console.log(` > Importation des paramètres à partir du fichier ${sConfigFile}`)
-if (!fs.existsSync(sConfigFile)) {
-  console.error(`Le fichier de configuration ${sConfigFile} est manquant.`)
-}
-
-let appConfig
-
-try {
-  appConfig = require(`./config.${APP_ENV}`)
-} catch (e) {
-  appConfig = {}
-}
-
-const _getEnvVariables = () => {
-  const variables = {}
-
-  for (const key in process.env) {
-    if (!key.toLowerCase().startsWith('tw_')) {
-      continue
-    }
-
-    // TW_TEST__KEY = TEST.KEY
-    const _key = key
-      .substring(3, key.length)
-      .replaceAll('__', '.')
-    variables[_key] = process.env[key]
-  }
-
-  return variables
-}
-const _loopOverObject = (obj) => {
-  const envVars = _getEnvVariables()
-  const values = _.cloneDeep((obj ?? {}))
-
-  for (const envVarsKey in envVars) {
-    _.set(values, envVarsKey, envVars[envVarsKey])
-  }
-
-  return values
-}
-
-const _getConfigOrThrow = (_path) => _loopOverObject(_.get(appConfig, _path, {}))
+// const APP_ENV = process.env.APP_ENV || (
+//   process.env.NODE_ENV === 'development'
+//     ? 'dev'
+//     : 'prod'
+// )
 
 module.exports = configure(function (/* ctx */) {
-  const CONFIG_APP = _getConfigOrThrow(['APP'])
-  const CONFIG_OAUTH = _getConfigOrThrow(['OAUTH'])
-  let APP = CONFIG_APP
-  let OAUTH = CONFIG_OAUTH
-
-  if (CONFIG_APP?.APP) {
-    APP = CONFIG_APP.APP
-  }
-
-  if (CONFIG_OAUTH?.OAUTH) {
-    OAUTH = CONFIG_OAUTH.OAUTH
-  }
-
-  const APP_SIMPLE_NAME = APP.name.toLowerCase()
-
   return {
     eslint: {
       // fix: true,
@@ -128,10 +67,7 @@ module.exports = configure(function (/* ctx */) {
       // publicPath: '/',
       // analyze: true,
       env: {
-        APP,
-        TWITCH_OAUTH_CLIENT_ID: OAUTH.twitch.clientId,
-        TWITCH_OAUTH_REDIRECT_URL: OAUTH.twitch.redirectUrl,
-        TWITCH_OAUTH_SCOPES: OAUTH.twitch.scopes
+        ...require('dotenv').config().parsed
       }
       // rawDefine: {}
       // ignorePublicFolder: true,
@@ -228,14 +164,11 @@ module.exports = configure(function (/* ctx */) {
       // extendGenerateSWOptions (cfg) {}
       // extendInjectManifestOptions (cfg) {},
       extendManifestJson (json) {
-        json = {
-          ...json,
-          name: APP.name,
-          short_name: APP.name,
-          description: `${APP.name} app.`,
-          display: 'standalone',
-          orientation: 'portrait'
-        }
+        json.name = process.env.VITE_APP_NAME
+        json.short_name = process.env.VITE_APP_NAME
+        json.description = `${process.env.VITE_APP_NAME} app.`
+        json.display = 'standalone'
+        json.orientation = 'portrait'
       }
       // extendPWACustomSWConf (esbuildConf) {}
     },
@@ -275,7 +208,7 @@ module.exports = configure(function (/* ctx */) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: APP_SIMPLE_NAME
+        appId: process.env.VITE_APP_NAME
       }
     },
 

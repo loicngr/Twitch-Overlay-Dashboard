@@ -44,16 +44,13 @@ export default defineComponent({
   components: { LogInPage },
 
   setup () {
-    // const $q = useQuasar()
-    // $q.dark.set(true)
-
     const leftDrawerOpen = ref(false)
     const mainStore = useMainStore()
 
     const isLoggedIn = computed(() => mainStore.isLoggedIn)
 
     return {
-      appName: process.env?.APP?.name ?? '???',
+      appName: import.meta.env.VITE_APP_NAME ?? '???',
       isLoggedIn,
       leftDrawerOpen, // todo
       toggleLeftDrawer () {

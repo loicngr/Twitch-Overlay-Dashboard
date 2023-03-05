@@ -2,11 +2,11 @@ import { OAUTH_TWITCH_BASE_URL } from 'src/utils/consts/twitch'
 import { getState } from 'src/utils/api/oauthTwitch'
 
 export const getTwitchOauthUrl = async () => {
-  if (!process.env.TWITCH_OAUTH_CLIENT_ID || _.isEmpty(process.env.TWITCH_OAUTH_CLIENT_ID)) {
+  if (!import.meta.env.VITE_OAUTH_TWITCH_CLIENT_ID || _.isEmpty(import.meta.env.VITE_OAUTH_TWITCH_CLIENT_ID)) {
     throw new Error('Twitch client id not found.')
   }
 
-  if (!process.env.TWITCH_OAUTH_REDIRECT_URL || _.isEmpty(process.env.TWITCH_OAUTH_REDIRECT_URL)) {
+  if (!import.meta.env.VITE_OAUTH_TWITCH_REDIRECT_URL || _.isEmpty(import.meta.env.VITE_OAUTH_TWITCH_REDIRECT_URL)) {
     throw new Error('Twitch redirect url not found.')
   }
 
@@ -18,10 +18,10 @@ export const getTwitchOauthUrl = async () => {
 
   let authURL = `${OAUTH_TWITCH_BASE_URL}/authorize`
   authURL += `?response_type=code`
-  authURL += `&client_id=${process.env.TWITCH_OAUTH_CLIENT_ID}`
-  authURL += `&redirect_uri=${process.env.TWITCH_OAUTH_REDIRECT_URL}`
+  authURL += `&client_id=${import.meta.env.VITE_OAUTH_TWITCH_CLIENT_ID}`
+  authURL += `&redirect_uri=${import.meta.env.VITE_OAUTH_TWITCH_REDIRECT_URL}`
   authURL += `&state=${state}`
-  authURL += `&scope=${encodeURIComponent((process.env.TWITCH_OAUTH_SCOPES ?? '').split(',').join(' '))}`
+  authURL += `&scope=${encodeURIComponent((import.meta.env.VITE_OAUTH_TWITCH_SCOPES ?? '').split(',').join(' '))}`
 
   console.log(authURL)
   return authURL

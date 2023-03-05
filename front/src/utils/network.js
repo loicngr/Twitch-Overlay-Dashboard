@@ -5,7 +5,7 @@ import { refreshJWT } from 'src/utils/api/logIn'
 import { toast } from 'src/utils/index'
 
 const network = axios.create({
-  baseURL: process.env.APP.api
+  baseURL: import.meta.env.VITE_APP_BACK
 })
 
 network.interceptors.request.use((config) => {
@@ -16,7 +16,7 @@ network.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${t.token}`
   }
 
-  if (process.env.DEV && window.xdebug) {
+  if (import.meta.env.DEV && window.xdebug) {
     config.params = {
       ...config.params || {},
       XDEBUG_SESSION_START: 'PHPSTORM'

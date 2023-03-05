@@ -38,4 +38,5 @@ yarn-error.log*
 *.njsproj
 *.sln
 
-/config.*.js
+.env.local
+.env.*.local
