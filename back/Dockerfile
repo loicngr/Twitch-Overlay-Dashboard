@@ -54,7 +54,6 @@ RUN set -eux; \
     ;
 
 ###> recipes ###
-RUN docker-php-ext-install pdo pdo_mysql
 ###< recipes ###
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
