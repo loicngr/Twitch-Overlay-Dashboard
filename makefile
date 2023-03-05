@@ -14,6 +14,9 @@ docker-prune:
 	docker system prune -a -f --volumes && \
 	docker volume rm $(docker volume ls -q)
 
+docker-build-prod:
+	@docker compose build --pull --no-cache
+
 docker-clear:
 	docker compose down --remove-orphans --rmi "local" -v
 
