@@ -29,6 +29,7 @@ services:
     depends_on:
       - database
     environment:
+      APP_ENV: prod
       DATABASE_HOST: database:3306
       DATABASE_USER: root
       DATABASE_PASSWORD: password
