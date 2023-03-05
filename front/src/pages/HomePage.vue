@@ -16,23 +16,11 @@
   </q-page>
 </template>
 
-<script>
-import { defineComponent } from 'vue'
+<script setup>
 import { getTwitchOauthUrl } from 'src/utils/twitch'
 import { loadingHandler } from 'src/utils'
 
-export default defineComponent({
-  name: 'HomePage',
-
-  setup () {
-    const goTwitchOAuth = async () => loadingHandler(async () => {
-      const url = await getTwitchOauthUrl()
-      window.location.href = url
-    })
-
-    return {
-      goTwitchOAuth
-    }
-  }
+const goTwitchOAuth = async () => loadingHandler(async () => {
+  window.location.href = await getTwitchOauthUrl()
 })
 </script>

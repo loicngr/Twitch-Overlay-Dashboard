@@ -37,7 +37,7 @@
 </template>
 
 <script setup>
-import { defineEmits, ref } from 'vue'
+import { ref } from 'vue'
 
 const emits = defineEmits(['submit'])
 const email = ref(null)

@@ -11,7 +11,6 @@
           round
           icon="fas fa-bars"
           aria-label="Menu"
-          @click="toggleLeftDrawer"
         />
 
         <q-toolbar-title>
@@ -34,29 +33,13 @@
   </q-layout>
 </template>
 
-<script>
-import { computed, defineComponent, ref } from 'vue'
+<script setup>
+import { computed } from 'vue'
 import { useMainStore } from 'stores/store'
 import LogInPage from 'pages/LogInPage.vue'
 
-export default defineComponent({
-  name: 'MainLayout',
-  components: { LogInPage },
+const mainStore = useMainStore()
 
-  setup () {
-    const leftDrawerOpen = ref(false)
-    const mainStore = useMainStore()
-
-    const isLoggedIn = computed(() => mainStore.isLoggedIn)
-
-    return {
-      appName: import.meta.env.VITE_APP_NAME ?? '???',
-      isLoggedIn,
-      leftDrawerOpen, // todo
-      toggleLeftDrawer () {
-        leftDrawerOpen.value = !leftDrawerOpen.value
-      }
-    }
-  }
-})
+const appName = import.meta.env.VITE_APP_NAME ?? '???'
+const isLoggedIn = computed(() => mainStore.isLoggedIn)
 </script>

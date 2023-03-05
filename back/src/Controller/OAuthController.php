@@ -71,7 +71,6 @@ class OAuthController extends BaseController
     public function oauthTwitch(
         Request $request,
     ): RedirectResponse {
-        $this->logger->error('oauthTwitch');
         $application = $this->getApplication();
         $failedUrl = sprintf('%s/error-oauth', $application['url']['front']);
 
