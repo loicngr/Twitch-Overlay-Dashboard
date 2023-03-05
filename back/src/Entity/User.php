@@ -30,7 +30,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ],
             ],
         ),
-        new Post(),
+        new Post(
+            validationContext: [
+                'groups' => [
+                    'Default',
+                    'user:create:item',
+                ],
+            ],
+        ),
         new Patch(),
     ],
     normalizationContext: [
@@ -49,6 +56,9 @@ class User
 {
     #[ORM\Id]
     #[ORM\Column]
+    #[Assert\NotBlank(groups: [
+        'user:create:item',
+    ])]
     #[Groups([
         'user:read:collection',
         'user:read:item',

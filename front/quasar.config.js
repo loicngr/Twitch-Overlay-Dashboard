@@ -1,10 +1,5 @@
 /* eslint-env node */
 
-/*
- * This file runs in a Node context (it's NOT transpiled by Babel), so use only
- * the ES6 features that are supported by your Node version. https://node.green/
- */
-
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 const { configure } = require('quasar/wrappers')
@@ -62,11 +57,17 @@ const _loopOverObject = (obj) => {
 const _getConfigOrThrow = (_path) => _loopOverObject(_.get(appConfig, _path, {}))
 
 module.exports = configure(function (/* ctx */) {
-  const CONFIG = _getConfigOrThrow(['APP'])
-  let APP = CONFIG
+  const CONFIG_APP = _getConfigOrThrow(['APP'])
+  const CONFIG_OAUTH = _getConfigOrThrow(['OAUTH'])
+  let APP = CONFIG_APP
+  let OAUTH = CONFIG_OAUTH
 
-  if (CONFIG?.APP) {
-    APP = CONFIG?.APP
+  if (CONFIG_APP?.APP) {
+    APP = CONFIG_APP.APP
+  }
+
+  if (CONFIG_OAUTH?.OAUTH) {
+    OAUTH = CONFIG_OAUTH.OAUTH
   }
 
   const APP_SIMPLE_NAME = APP.name.toLowerCase()
@@ -117,7 +118,7 @@ module.exports = configure(function (/* ctx */) {
         node: 'node16'
       },
 
-      vueRouterMode: 'hash' // available values: 'hash', 'history'
+      vueRouterMode: 'hash', // available values: 'hash', 'history'
       // vueRouterBase,
       // vueDevtools,
       // vueOptionsAPI: false,
@@ -126,7 +127,12 @@ module.exports = configure(function (/* ctx */) {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: {
+        APP,
+        TWITCH_OAUTH_CLIENT_ID: OAUTH.twitch.clientId,
+        TWITCH_OAUTH_REDIRECT_URL: OAUTH.twitch.redirectUrl,
+        TWITCH_OAUTH_SCOPES: OAUTH.twitch.scopes
+      }
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
@@ -144,7 +150,8 @@ module.exports = configure(function (/* ctx */) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       // https: true
-      open: true // opens browser window automatically
+      port: 8081,
+      open: false // opens browser window automatically
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
@@ -162,7 +169,11 @@ module.exports = configure(function (/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: [
+        'Notify',
+        'Dialog',
+        'Loading'
+      ]
     },
 
     // animations: 'all', // --- includes all animations

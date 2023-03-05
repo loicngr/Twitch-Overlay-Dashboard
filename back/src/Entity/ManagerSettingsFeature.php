@@ -43,9 +43,6 @@ class ManagerSettingsFeature
         return OAuthTwitch::fromArray($this->twitchOAuth);
     }
 
-    #[Groups([
-        'manager:update:item',
-    ])]
     public function setTwitchOAuth(OAuthTwitch $twitchOAuth): static
     {
         $this->twitchOAuth = $twitchOAuth->toArray();

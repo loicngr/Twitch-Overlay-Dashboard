@@ -1,15 +1,65 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout
+    v-if="isLoggedIn"
+    view="lHh Lpr lFf"
+  >
+    <q-header elevated>
+      <q-toolbar>
+        <q-btn
+          flat
+          dense
+          round
+          icon="fas fa-bars"
+          aria-label="Menu"
+          @click="toggleLeftDrawer"
+        />
+
+        <q-toolbar-title>
+          {{ appName }}
+        </q-toolbar-title>
+      </q-toolbar>
+    </q-header>
+
     <q-page-container>
       <router-view />
+    </q-page-container>
+  </q-layout>
+  <q-layout
+    v-else
+    view="lHh Lpr lFf"
+  >
+    <q-page-container>
+      <log-in-page />
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
+import { useMainStore } from 'stores/store'
+import LogInPage from 'pages/LogInPage.vue'
 
 export default defineComponent({
-  name: 'MainLayout'
+  name: 'MainLayout',
+  components: { LogInPage },
+
+  setup () {
+    // const $q = useQuasar()
+    // $q.dark.set(true)
+
+    const leftDrawerOpen = ref(false)
+    const mainStore = useMainStore()
+
+    const isLoggedIn = computed(() => mainStore.isLoggedIn)
+
+    return {
+      appName: process.env?.APP?.name ?? '???',
+      isLoggedIn,
+      leftDrawerOpen, // todo
+      toggleLeftDrawer () {
+        leftDrawerOpen.value = !leftDrawerOpen.value
+      }
+    }
+  }
 })
 </script>

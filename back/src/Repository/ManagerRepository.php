@@ -56,6 +56,17 @@ class ManagerRepository extends ServiceEntityRepository implements PasswordUpgra
         $this->save($user, true);
     }
 
+    public function findManagerFromTwitchState(string $state): ?Manager
+    {
+        foreach (($this->findAll() ?? []) as $manager) {
+            if ($state === $manager->getManagerSettingsFeature()->getTwitchOAuth()->getState()) {
+                return $manager;
+            }
+        }
+
+        return null;
+    }
+
 //    /**
 //     * @return Manager[] Returns an array of Manager objects
 //     */
