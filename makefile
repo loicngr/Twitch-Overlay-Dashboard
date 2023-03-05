@@ -6,6 +6,9 @@ APP_VERSION=0.0.1
 ########################################
 ################ COMMON ################
 ########################################
+docker-fix-chown:
+	docker compose run --rm php chown -R $(id -u):$(id -g) .
+
 docker-clear:
 	docker compose down --remove-orphans --rmi "local" -v
 
