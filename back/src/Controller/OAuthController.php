@@ -71,6 +71,7 @@ class OAuthController extends BaseController
     public function oauthTwitch(
         Request $request,
     ): RedirectResponse {
+        $this->logger->error('oauthTwitch');
         $application = $this->getApplication();
         $failedUrl = sprintf('%s/error-oauth', $application['url']['front']);
 
@@ -126,8 +127,8 @@ class OAuthController extends BaseController
             $statusCode = $response->getStatusCode();
 
             if (Response::HTTP_OK !== $statusCode) {
-                $this->logger->warning($response->getContent());
-                $this->logger->warning($statusCode);
+                $this->logger->error($response->getContent());
+                $this->logger->error($statusCode);
 
                 return $cbError('Redirection flow error status');
             }
