@@ -9,6 +9,7 @@ RUN npm i -g @quasar/cli
 COPY . .
 
 FROM app_node as app_node_build
+RUN npm install
 RUN npm run build:pwa
 
 FROM caddy:2.6-alpine AS app_caddy
