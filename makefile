@@ -6,22 +6,12 @@ APP_VERSION=0.0.1
 ########################################
 ################ COMMON ################
 ########################################
-docker-fix-chown:
-	docker compose run --rm php chown -R $(id -u):$(id -g) .
-
 docker-prune:
-	@cd $(FOLDER_BACK) && \
-	docker compose down --remove-orphans && \
-	docker system prune -a -f --volumes && \
+	@docker system prune -a -f --volumes && \
 	docker volume rm $(docker volume ls -q)
 
-docker-build-prod:
-	@cd $(FOLDER_BACK) && \
-	docker compose build --pull --no-cache
-
-docker-clear:
-	@cd $(FOLDER_BACK) && \
-	docker compose down --remove-orphans --rmi "local" -v
+docker-fix-chown:
+	docker compose run --rm php chown -R $(id -u):$(id -g) .
 
 check:
 	@make front-fixer && \
@@ -30,6 +20,14 @@ check:
 #########################################
 ################ BACKEND ################
 #########################################
+back-docker-build-prod:
+	@cd $(FOLDER_BACK) && \
+	docker compose build --pull --no-cache
+
+back-docker-down:
+	@cd $(FOLDER_BACK) && \
+	docker compose down --rmi "local"
+
 back-tests: back-reset-test
 	@cd $(FOLDER_BACK) && \
 	./vendor/phpunit/phpunit/phpunit -c ./phpunit.xml.dist
@@ -62,6 +60,14 @@ back-serve:
 ##########################################
 ################ FRONTEND ################
 ##########################################
+front-docker-build-prod:
+	@cd $(FOLDER_FRONT) && \
+	docker compose build --pull --no-cache
+
+front-docker-down:
+	@cd $(FOLDER_FRONT) && \
+	docker compose down --rmi "local"
+
 front-fixer:
 	cd $(FOLDER_FRONT) && \
 	npm run lint -- --fix

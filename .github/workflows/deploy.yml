@@ -1,0 +1,51 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+
+    steps:
+#      - name: Deploy back
+#        uses: appleboy/ssh-action@v0.1.8
+#        env:
+#          TWITCH_OAUTH_CLIENT_ID: ${{ secrets.OAUTH_TWITCH_CLIENT_ID }}
+#          TWITCH_OAUTH_SECRET: ${{ secrets.OAUTH_TWITCH_SECRET }}
+#          APP_SECRET: ${{ secrets.BACK_APP_SECRET }}
+#          SERVER_NAME: ${{ secrets.BACK_SERVER_NAME }}
+#          TW_BACK_URL: ${{ secrets.TW_BACK_URL }}
+#          TW_FRONT_URL: ${{ secrets.TW_FRONT_URL }}
+#          TWITCH_OAUTH_REDIRECT_URL: ${{ secrets.OAUTH_TWITCH_REDIRECT_URL }}
+#        with:
+#          host: ${{ secrets.HOST }}
+#          username: ${{ secrets.USERNAME }}
+#          key: ${{ secrets.PRIVATE_KEY }}
+#          port: ${{ secrets.PORT }}
+#          envs: TWITCH_OAUTH_CLIENT_ID,TWITCH_OAUTH_SECRET,APP_SECRET,SERVER_NAME,TW_BACK_URL,TW_FRONT_URL,TWITCH_OAUTH_REDIRECT_URL
+#          script: |
+#            cd ~/prod/Twitch-Overlay-Dashboard
+#            git pull origin main
+#            make back-docker-build-prod
+#            cd ./back
+#            SERVER_NAME=$SERVER_NAME TWITCH_OAUTH_CLIENT_ID=$TWITCH_OAUTH_CLIENT_ID TWITCH_OAUTH_SECRET=$TWITCH_OAUTH_SECRET TWITCH_OAUTH_REDIRECT_URL=$TWITCH_OAUTH_REDIRECT_URL TW_FRONT_URL=$TW_FRONT_URL TW_BACK_URL=$TW_BACK_URL APP_SECRET=$APP_SECRET docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+      - name: Deploy front
+        uses: appleboy/ssh-action@v0.1.8
+        env:
+          OAUTH_TWITCH_CLIENT_ID: ${{ secrets.OAUTH_TWITCH_CLIENT_ID }}
+          SERVER_NAME: ${{ secrets.FRONT_SERVER_NAME }}
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          envs: OAUTH_TWITCH_CLIENT_ID,SERVER_NAME
+          script: |
+            cd ~/prod/Twitch-Overlay-Dashboard
+            git pull origin main
+            make front-docker-build-prod
+            cd ./front
+            SERVER_NAME=$SERVER_NAME VITE_OAUTH_TWITCH_CLIENT_ID=$OAUTH_TWITCH_CLIENT_ID docker compose -f docker-compose.yml up -d
