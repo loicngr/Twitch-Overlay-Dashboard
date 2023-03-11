@@ -1,6 +1,10 @@
 FROM composer/composer:2-bin AS composer
 FROM mlocati/php-extension-installer:latest AS php_extension_installer
-FROM php:8.1-fpm-alpine as app_php
+FROM caddy:2.6-builder-alpine AS app_caddy_builder
+
+RUN xcaddy build
+
+FROM php:8.1-fpm-alpine AS app_php
 
 ARG STABILITY="stable"
 ENV STABILITY ${STABILITY}
@@ -8,8 +12,7 @@ ENV STABILITY ${STABILITY}
 ARG SYMFONY_VERSION=""
 ENV SYMFONY_VERSION ${SYMFONY_VERSION}
 
-ARG APP_ENV="prod"
-ENV APP_ENV ${APP_ENV}
+ENV APP_ENV=prod
 
 WORKDIR /srv/app
 
@@ -18,14 +21,9 @@ COPY --from=php_extension_installer --link /usr/bin/install-php-extensions /usr/
 RUN apk add --no-cache \
 		acl \
 		fcgi \
-    	libintl \
-    	icu \
-    	icu-dev \
-    	libxml2-dev \
 		file \
 		gettext \
 		git \
-    	nginx \
 	;
 
 RUN set -eux; \
@@ -36,7 +34,8 @@ RUN set -eux; \
 		opcache \
     ;
 
-RUN docker-php-ext-install pdo pdo_mysql
+###> recipes ###
+###< recipes ###
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY --link docker/php/conf.d/app.ini $PHP_INI_DIR/conf.d/
@@ -50,24 +49,19 @@ RUN chmod +x /usr/local/bin/docker-healthcheck
 
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
 
-ADD docker/nginx/app.conf /etc/nginx/sites-enabled/default
-
-RUN ln -sf /dev/stdout /var/log/nginx/access.log; \
-    ln -sf /dev/stderr /var/log/nginx/error.log
-
 COPY --link docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
+
+VOLUME /srv/app
 
 ENTRYPOINT ["docker-entrypoint"]
 CMD ["php-fpm"]
 
-# https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
 COPY --from=composer --link /composer /usr/bin/composer
 
-# prevent the reinstallation of vendors at every changes in the source code
 COPY --link composer.* symfony.* ./
 RUN set -eux; \
     if [ -f composer.json ]; then \
@@ -75,7 +69,6 @@ RUN set -eux; \
 		composer clear-cache; \
     fi
 
-# copy sources
 COPY --link  . ./
 RUN rm -Rf docker/
 
@@ -86,7 +79,7 @@ RUN set -eux; \
 		composer dump-env prod; \
 		composer run-script --no-dev post-install-cmd; \
 		chmod +x bin/console; \
-    	bin/console lexik:jwt:generate-keypair; \
+		bin/console lexik:jwt:generate-keypair; \
     	sync; \
     fi
 
@@ -107,9 +100,10 @@ RUN set -eux; \
 
 RUN rm -f .env.local.php
 
-# Migration image
-FROM app_php AS app_php_migrate
+#FROM caddy:2.6-alpine
 
 WORKDIR /srv/app
 
-CMD ["bin/console", "doctrine:migrations:migrate"]
+COPY --from=app_caddy_builder --link /usr/bin/caddy /usr/bin/caddy
+COPY --from=app_php --link /srv/app/public public/
+COPY --link docker/caddy/Caddyfile /etc/caddy/Caddyfile

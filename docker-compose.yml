@@ -1,37 +1,98 @@
+version: "3.7"
+
+networks:
+  caddy:
+    external: true
+
+volumes:
+  php_socket:
+  caddy_srv:
+    external: true
+  caddy_config:
+  caddy_data:
+
 services:
-  mariadb:
+  database:
     image: mariadb:10.6.12
-    container_name: mariadb
+    container_name: database
     restart: unless-stopped
     command: '--default-authentication-plugin=mysql_native_password'
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: app
+      MYSQL_DATABASE: twitchOverlay
       MYSQL_PASSWORD: password
 
-  back:
-    container_name: back
-    environment:
-      DATABASE_HOST: mariadb
-      DATABASE_USER: root
-      DATABASE_PASSWORD: password
-      DATABASE_NAME: app
-      DATABASE_SERVER_VERSION: mariadb-10.6.12
-    build:
-      context: ./back
-      dockerfile: Dockerfile
-    depends_on:
-      - mariadb
-    links:
-      - mariadb
-
-  front:
+  node:
     build:
       context: ./front
-      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - caddy
     volumes:
-      - "./front/dist/pwa:/code/dist/pwa"
+      - caddy_srv:/srv
+    environment:
+      APP_ENV: prod
+    labels:
+      caddy: ${CADDY_FRONT_NAME:-localhost}
+      caddy.root: "* /srv/front/dist/pwa"
+      caddy.encode: zstd gzip
+      caddy.file_server: ""
+      caddy.tls: "internal"
+
+  php:
+    build:
+      context: ./back
+      target: app_php
+    restart: unless-stopped
+    networks:
+      - caddy
+    volumes:
+      - php_socket:/var/run/php
+    healthcheck:
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
     depends_on:
-      - back
+      - database
     links:
-      - back
+      - database
+    environment:
+      APP_ENV: prod
+      DATABASE_HOST: database
+      DATABASE_USER: root
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: twitchOverlay
+      DATABASE_SERVER_VERSION: mariadb-10.6.12
+    labels:
+      caddy: ${CADDY_BACK_NAME:-api.localhost}
+      caddy.reverse_proxy: "{{upstreams 80}}"
+
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    ports:
+      # HTTP
+      - target: 80
+        published: ${HTTP_PORT:-80}
+        protocol: tcp
+      # HTTPS
+      - target: 443
+        published: ${HTTPS_PORT:-443}
+        protocol: tcp
+      # HTTP/3
+      - target: 443
+        published: ${HTTP3_PORT:-443}
+        protocol: udp
+    environment:
+      - CADDY_INGRESS_NETWORKS=caddy
+    depends_on:
+      - php
+    networks:
+      - caddy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - php_socket:/var/run/php
+      - caddy_data:/data
+      - caddy_srv:/srv
+      - caddy_config:/config
+    restart: unless-stopped
