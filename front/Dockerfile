@@ -3,7 +3,7 @@ RUN xcaddy build
 
 FROM node:16.19-alpine AS app_node
 
-WORKDIR /srv/front
+WORKDIR /srv/app
 
 COPY package*.json ./
 RUN npm install
@@ -16,7 +16,7 @@ RUN npm run build:pwa
 
 FROM caddy:2.6-alpine AS app_caddy
 
-WORKDIR /srv/front
+WORKDIR /srv/app
 
 COPY --from=app_caddy_builder --link /usr/bin/caddy /usr/bin/caddy
 COPY --link docker/caddy/Caddyfile /etc/caddy/Caddyfile

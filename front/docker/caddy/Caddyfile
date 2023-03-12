@@ -1,11 +1,9 @@
 {
     # Debug
     {$CADDY_DEBUG}
-
-  auto_https off
 }
 
-localhost, caddy:80
+{$SERVER_NAME}
 
 {$CADDY_EXTRA_CONFIG}
 
