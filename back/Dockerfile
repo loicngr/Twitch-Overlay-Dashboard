@@ -1,42 +1,45 @@
 FROM composer/composer:2-bin AS composer
 FROM mlocati/php-extension-installer:latest AS php_extension_installer
-FROM php:8.1-fpm-alpine as app_php
+FROM caddy:2.6-builder-alpine AS app_caddy_builder
 
+RUN xcaddy build
+
+# Prod image
+FROM php:8.1-fpm-alpine AS app_php
+
+# Allow to use development versions of Symfony
 ARG STABILITY="stable"
 ENV STABILITY ${STABILITY}
 
+# Allow to select Symfony version
 ARG SYMFONY_VERSION=""
 ENV SYMFONY_VERSION ${SYMFONY_VERSION}
 
-ARG APP_ENV="prod"
-ENV APP_ENV ${APP_ENV}
+ENV APP_ENV=prod
 
 WORKDIR /srv/app
 
+# php extensions installer: https://github.com/mlocati/docker-php-extension-installer
 COPY --from=php_extension_installer --link /usr/bin/install-php-extensions /usr/local/bin/
 
+# persistent / runtime deps
 RUN apk add --no-cache \
 		acl \
 		fcgi \
-    	libintl \
-    	icu \
-    	icu-dev \
-    	libxml2-dev \
 		file \
 		gettext \
 		git \
-    	nginx \
 	;
 
 RUN set -eux; \
     install-php-extensions \
     	intl \
     	zip \
+    	pdo \
+    	pdo_mysql \
     	apcu \
 		opcache \
     ;
-
-RUN docker-php-ext-install pdo pdo_mysql
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY --link docker/php/conf.d/app.ini $PHP_INI_DIR/conf.d/
@@ -49,11 +52,6 @@ COPY --link docker/php/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
 RUN chmod +x /usr/local/bin/docker-healthcheck
 
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
-
-ADD docker/nginx/app.conf /etc/nginx/sites-enabled/default
-
-RUN ln -sf /dev/stdout /var/log/nginx/access.log; \
-    ln -sf /dev/stderr /var/log/nginx/error.log
 
 COPY --link docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
@@ -85,9 +83,7 @@ RUN set -eux; \
 		composer dump-autoload --classmap-authoritative --no-dev; \
 		composer dump-env prod; \
 		composer run-script --no-dev post-install-cmd; \
-		chmod +x bin/console; \
-    	bin/console lexik:jwt:generate-keypair; \
-    	sync; \
+		chmod +x bin/console; sync; \
     fi
 
 # Dev image
@@ -107,9 +103,11 @@ RUN set -eux; \
 
 RUN rm -f .env.local.php
 
-# Migration image
-FROM app_php AS app_php_migrate
+# Caddy image
+FROM caddy:2.6-alpine AS app_caddy
 
 WORKDIR /srv/app
 
-CMD ["bin/console", "doctrine:migrations:migrate"]
+COPY --from=app_caddy_builder --link /usr/bin/caddy /usr/bin/caddy
+COPY --from=app_php --link /srv/app/public public/
+COPY --link docker/caddy/Caddyfile /etc/caddy/Caddyfile

@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.8"
 
 networks:
   caddy:
@@ -25,13 +25,12 @@ services:
   node:
     build:
       context: ./front
+      target: app_node
     restart: unless-stopped
     networks:
       - caddy
     volumes:
       - caddy_srv:/srv
-    environment:
-      APP_ENV: prod
     labels:
       caddy: ${CADDY_FRONT_NAME:-localhost}
       caddy.root: "* /srv/front/dist/pwa"
@@ -42,8 +41,10 @@ services:
   php:
     build:
       context: ./back
-      target: app_php
+      target: app_caddy
     restart: unless-stopped
+    depends_on:
+      - database
     networks:
       - caddy
     volumes:
@@ -53,10 +54,6 @@ services:
       timeout: 3s
       retries: 3
       start_period: 30s
-    depends_on:
-      - database
-    links:
-      - database
     environment:
       APP_ENV: prod
       DATABASE_HOST: database
@@ -70,6 +67,7 @@ services:
 
   caddy:
     image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    restart: unless-stopped
     ports:
       # HTTP
       - target: 80
@@ -91,8 +89,6 @@ services:
       - caddy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - php_socket:/var/run/php
       - caddy_data:/data
       - caddy_srv:/srv
       - caddy_config:/config
-    restart: unless-stopped

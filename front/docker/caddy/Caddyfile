@@ -2,7 +2,7 @@
     # Debug
     {$CADDY_DEBUG}
 
-	auto_https off
+  auto_https off
 }
 
 localhost, caddy:80
@@ -12,9 +12,8 @@ localhost, caddy:80
 log
 
 route {
-    root * /srv/app/public
+    root * /srv/app/dist/pwa
 
-    php_fastcgi unix//var/run/php/php-fpm.sock
     encode zstd gzip
     file_server
 }
