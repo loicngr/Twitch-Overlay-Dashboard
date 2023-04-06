@@ -2,53 +2,53 @@
 
 namespace App\Entity\OAuth;
 
-use DateTimeImmutable;
-use Symfony\Component\Serializer\Annotation\Groups;
+use App\Utils\Constants\Groups;
+use Symfony\Component\Serializer\Annotation\Groups as ApiGroups;
 
 class OAuthTwitch
 {
-    #[Groups([
-        'manager:read:item',
-        'manager:update:item',
+    #[ApiGroups([
+        Groups::GROUP_MANAGER_READ_ITEM,
+        Groups::GROUP_MANAGER_UPDATE_ITEM,
     ])]
     protected ?string $state = null;
 
-    #[Groups([
-        'manager:read:item',
-        'manager:update:item',
+    #[ApiGroups([
+        Groups::GROUP_MANAGER_READ_ITEM,
+        Groups::GROUP_MANAGER_UPDATE_ITEM,
     ])]
-    protected ?string $idToken = null;
+    protected ?int $refreshRetryCount = null;
 
-    #[Groups([
-        'manager:read:item',
-        'manager:update:item',
+    #[ApiGroups([
+        Groups::GROUP_MANAGER_READ_ITEM,
+        Groups::GROUP_MANAGER_UPDATE_ITEM,
     ])]
     protected ?string $accessToken = null;
 
-    #[Groups([
-        'manager:read:item',
-        'manager:update:item',
+    #[ApiGroups([
+        Groups::GROUP_MANAGER_READ_ITEM,
+        Groups::GROUP_MANAGER_UPDATE_ITEM,
     ])]
     protected ?string $refreshToken = null;
 
-    #[Groups([
-        'manager:read:item',
-        'manager:update:item',
+    #[ApiGroups([
+        Groups::GROUP_MANAGER_READ_ITEM,
+        Groups::GROUP_MANAGER_UPDATE_ITEM,
     ])]
     protected ?int $expiresIn = null;
 
-    #[Groups([
-        'manager:read:item',
-        'manager:update:item',
+    #[ApiGroups([
+        Groups::GROUP_MANAGER_READ_ITEM,
+        Groups::GROUP_MANAGER_UPDATE_ITEM,
     ])]
-    protected ?DateTimeImmutable $createdAt = null;
+    protected ?string $createdAt = null;
 
     public function getState(): ?string
     {
         return $this->state;
     }
 
-    public function setState(?string $state): static
+    public function setState(?string $state): self
     {
         $this->state = $state;
 
@@ -60,7 +60,7 @@ class OAuthTwitch
         return $this->accessToken;
     }
 
-    public function setAccessToken(?string $accessToken): static
+    public function setAccessToken(?string $accessToken): self
     {
         $this->accessToken = $accessToken;
 
@@ -72,7 +72,7 @@ class OAuthTwitch
         return $this->refreshToken;
     }
 
-    public function setRefreshToken(?string $refreshToken): static
+    public function setRefreshToken(?string $refreshToken): self
     {
         $this->refreshToken = $refreshToken;
 
@@ -84,14 +84,45 @@ class OAuthTwitch
         return $this->expiresIn;
     }
 
-    public function setExpiresIn(?int $expiresIn): static
+    public function setExpiresIn(?int $expiresIn): self
     {
         $this->expiresIn = $expiresIn;
 
         return $this;
     }
 
-    public function reset(): static
+    public function getCreatedAt(): ?string
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?string $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getRefreshRetryCount(): int
+    {
+        return $this->refreshRetryCount ?? 0;
+    }
+
+    public function setRefreshRetryCount(int $refreshRetryCount = 0): self
+    {
+        $this->refreshRetryCount = $refreshRetryCount;
+
+        return $this;
+    }
+
+    public function addRefreshRetryCount(int $count = 1): self
+    {
+        $this->refreshRetryCount += $count;
+
+        return $this;
+    }
+
+    public function reset(): self
     {
         $this->state = null;
         $this->accessToken = null;
@@ -102,7 +133,7 @@ class OAuthTwitch
         return $this;
     }
 
-    public function assign(array $options): static
+    public function assign(array $options): self
     {
         if (
             isset(
@@ -132,7 +163,7 @@ class OAuthTwitch
         return $output;
     }
 
-    public static function fromArray(?array $options): static
+    public static function fromArray(?array $options): self
     {
         $class = new static();
 

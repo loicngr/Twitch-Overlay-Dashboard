@@ -4,8 +4,9 @@ namespace App\Entity;
 
 use App\Entity\OAuth\OAuthTwitch;
 use App\Repository\ManagerSettingsFeatureRepository;
+use App\Utils\Constants\Groups;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Groups as ApiGroups;
 
 #[ORM\Entity(repositoryClass: ManagerSettingsFeatureRepository::class)]
 class ManagerSettingsFeature
@@ -28,22 +29,22 @@ class ManagerSettingsFeature
         return $this->manager;
     }
 
-    public function setManager(Manager $manager): static
+    public function setManager(Manager $manager): self
     {
         $this->manager = $manager;
 
         return $this;
     }
 
-    #[Groups([
-        'manager:read:item',
+    #[ApiGroups([
+        Groups::GROUP_MANAGER_READ_ITEM,
     ])]
     public function getTwitchOAuth(): OAuthTwitch
     {
         return OAuthTwitch::fromArray($this->twitchOAuth);
     }
 
-    public function setTwitchOAuth(OAuthTwitch $twitchOAuth): static
+    public function setTwitchOAuth(OAuthTwitch $twitchOAuth): self
     {
         $this->twitchOAuth = $twitchOAuth->toArray();
 

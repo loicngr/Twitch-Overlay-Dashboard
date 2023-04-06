@@ -9,11 +9,12 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\ManagerRepository;
 use App\State\UserPasswordHasher;
+use App\Utils\Constants\Groups;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Groups as ApiGroups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ManagerRepository::class)]
@@ -21,10 +22,18 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
     operations: [
         new Get(),
+        new Get(
+            uriTemplate: '/me',
+            normalizationContext: [
+                'groups' => [
+                    Groups::GROUP_MANAGER_READ_ITEM,
+                ],
+            ],
+        ),
         new GetCollection(
             normalizationContext: [
                 'groups' => [
-                    'manager:read:collection',
+                    Groups::GROUP_MANAGER_READ_COLLECTION,
                 ],
             ],
         ),
@@ -32,7 +41,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             validationContext: [
                 'groups' => [
                     'Default',
-                    'manager:create:item',
+                    Groups::GROUP_MANAGER_CREATE_ITEM,
                 ],
             ],
             processor: UserPasswordHasher::class,
@@ -43,15 +52,16 @@ use Symfony\Component\Validator\Constraints as Assert;
     ],
     normalizationContext: [
         'groups' => [
-            'manager:read:item',
+            Groups::GROUP_MANAGER_READ_ITEM,
         ],
     ],
     denormalizationContext: [
         'groups' => [
-            'manager:create:item',
-            'manager:update:item',
+            Groups::GROUP_MANAGER_CREATE_ITEM,
+            Groups::GROUP_MANAGER_UPDATE_ITEM,
         ],
     ],
+    security: "is_granted('ROLE_ADMIN')",
 )]
 class Manager implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -64,19 +74,19 @@ class Manager implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups([
-        'manager:read:collection',
-        'manager:read:item',
+    #[ApiGroups([
+        Groups::GROUP_MANAGER_READ_COLLECTION,
+        Groups::GROUP_MANAGER_READ_ITEM,
     ])]
     protected ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank(message: 'Email cannot be blank')]
-    #[Groups([
-        'manager:read:collection',
-        'manager:read:item',
-        'manager:create:item',
-        'manager:update:item',
+    #[ApiGroups([
+        Groups::GROUP_MANAGER_READ_COLLECTION,
+        Groups::GROUP_MANAGER_READ_ITEM,
+        Groups::GROUP_MANAGER_CREATE_ITEM,
+        Groups::GROUP_MANAGER_UPDATE_ITEM,
     ])]
     protected ?string $email = null;
 
@@ -85,19 +95,19 @@ class Manager implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Assert\NotBlank(
         groups: [
-            'manager:create:item',
+            Groups::GROUP_MANAGER_CREATE_ITEM,
         ],
     )]
-    #[Groups([
-        'manager:create:item',
-        'manager:update:item',
+    #[ApiGroups([
+        Groups::GROUP_MANAGER_CREATE_ITEM,
+        Groups::GROUP_MANAGER_UPDATE_ITEM,
     ])]
     protected ?string $plainPassword = null;
 
     #[ORM\Column]
-    #[Groups([
-        'manager:read:collection',
-        'manager:read:item',
+    #[ApiGroups([
+        Groups::GROUP_MANAGER_READ_COLLECTION,
+        Groups::GROUP_MANAGER_READ_ITEM,
     ])]
     protected array $roles = [];
 
@@ -106,9 +116,9 @@ class Manager implements UserInterface, PasswordAuthenticatedUserInterface
         targetEntity: ManagerSettingsFeature::class,
         cascade: ['persist'],
     )]
-    #[Groups([
-        'manager:read:item',
-        'manager:update:item',
+    #[ApiGroups([
+        Groups::GROUP_MANAGER_READ_ITEM,
+        Groups::GROUP_MANAGER_UPDATE_ITEM,
     ])]
     protected ?ManagerSettingsFeature $managerSettingsFeature = null;
 
@@ -122,7 +132,7 @@ class Manager implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function setEmail(string $email): static
+    public function setEmail(string $email): self
     {
         $this->email = $email;
 
@@ -150,7 +160,7 @@ class Manager implements UserInterface, PasswordAuthenticatedUserInterface
         return array_unique($roles);
     }
 
-    public function setRoles(array $roles): static
+    public function setRoles(array $roles): self
     {
         $this->roles = $roles;
 
@@ -165,7 +175,7 @@ class Manager implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function setPassword(string $password): static
+    public function setPassword(string $password): self
     {
         $this->password = $password;
 
@@ -177,7 +187,7 @@ class Manager implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->plainPassword;
     }
 
-    public function setPlainPassword(?string $plainPassword): static
+    public function setPlainPassword(?string $plainPassword): self
     {
         $this->plainPassword = $plainPassword;
 
@@ -202,7 +212,7 @@ class Manager implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setManagerSettingsFeature(
         ManagerSettingsFeature $managerSettingsFeature,
-    ): static {
+    ): self {
         $this->managerSettingsFeature = $managerSettingsFeature;
         $managerSettingsFeature->setManager($this);
 

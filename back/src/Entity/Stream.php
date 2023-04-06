@@ -8,13 +8,14 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\StreamRepository;
+use App\Utils\Constants\Groups;
 use App\Utils\Constants\Variables;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Context;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Groups as ApiGroups;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 #[ORM\Entity(repositoryClass: StreamRepository::class)]
@@ -24,7 +25,7 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
         new GetCollection(
             normalizationContext: [
                 'groups' => [
-                    'stream:read:collection',
+                    Groups::GROUP_STREAM_READ_COLLECTION,
                 ],
             ],
         ),
@@ -32,7 +33,7 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
             validationContext: [
                 'groups' => [
                     'Default',
-                    'game:create:item',
+                    Groups::GROUP_GAME_CREATE_ITEM,
                 ],
             ],
         ),
@@ -40,13 +41,13 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
     ],
     normalizationContext: [
         'groups' => [
-            'stream:read:item',
+            Groups::GROUP_STREAM_READ_ITEM,
         ],
     ],
     denormalizationContext: [
         'groups' => [
-            'stream:create:item',
-            'stream:update:item',
+            Groups::GROUP_STREAM_CREATE_ITEM,
+            Groups::GROUP_STREAM_UPDATE_ITEM,
         ],
     ],
 )]
@@ -57,34 +58,34 @@ class Stream
 
     #[ORM\Id]
     #[ORM\Column]
-    #[Groups([
-        'stream:read:collection',
-        'stream:read:item',
-        'stream:create:item',
-        'user:read:item',
-        'game:read:item',
+    #[ApiGroups([
+        Groups::GROUP_STREAM_READ_COLLECTION,
+        Groups::GROUP_STREAM_READ_ITEM,
+        Groups::GROUP_STREAM_CREATE_ITEM,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_GAME_READ_ITEM,
     ])]
     protected ?int $id = null;
 
     #[ORM\Column]
-    #[Groups([
-        'stream:read:collection',
-        'stream:read:item',
-        'stream:create:item',
-        'stream:update:item',
-        'user:read:item',
-        'game:read:item',
+    #[ApiGroups([
+        Groups::GROUP_STREAM_READ_COLLECTION,
+        Groups::GROUP_STREAM_READ_ITEM,
+        Groups::GROUP_STREAM_CREATE_ITEM,
+        Groups::GROUP_STREAM_UPDATE_ITEM,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_GAME_READ_ITEM,
     ])]
     protected ?int $type = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups([
-        'stream:read:collection',
-        'stream:read:item',
-        'stream:create:item',
-        'stream:update:item',
-        'user:read:item',
-        'game:read:item',
+    #[ApiGroups([
+        Groups::GROUP_STREAM_READ_COLLECTION,
+        Groups::GROUP_STREAM_READ_ITEM,
+        Groups::GROUP_STREAM_CREATE_ITEM,
+        Groups::GROUP_STREAM_UPDATE_ITEM,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_GAME_READ_ITEM,
     ])]
     protected ?string $title = null;
 
@@ -92,12 +93,12 @@ class Stream
     #[Context([
         DateTimeNormalizer::FORMAT_KEY => Variables::DATE_TIME_SERVER,
     ])]
-    #[Groups([
-        'stream:read:collection',
-        'stream:read:item',
-        'stream:create:item',
-        'user:read:item',
-        'game:read:item',
+    #[ApiGroups([
+        Groups::GROUP_STREAM_READ_COLLECTION,
+        Groups::GROUP_STREAM_READ_ITEM,
+        Groups::GROUP_STREAM_CREATE_ITEM,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_GAME_READ_ITEM,
     ])]
     protected ?DateTimeImmutable $startAt = null;
 
@@ -105,18 +106,18 @@ class Stream
         targetEntity: Game::class,
         inversedBy: 'streams',
     )]
-    #[Groups([
-        'stream:read:item',
-        'user:read:item',
+    #[ApiGroups([
+        Groups::GROUP_STREAM_READ_ITEM,
+        Groups::GROUP_USER_READ_ITEM,
     ])]
     protected ?Collection $games = null;
 
     #[ORM\ManyToOne(inversedBy: 'streams')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups([
-        'stream:read:item',
-        'stream:create:item',
-        'game:read:item',
+    #[ApiGroups([
+        Groups::GROUP_STREAM_READ_ITEM,
+        Groups::GROUP_STREAM_CREATE_ITEM,
+        Groups::GROUP_GAME_READ_ITEM,
     ])]
     protected ?User $user = null;
 
@@ -130,7 +131,7 @@ class Stream
         return $this->id;
     }
 
-    public function setId(int $id): static
+    public function setId(int $id): self
     {
         $this->id = $id;
 
@@ -142,7 +143,7 @@ class Stream
         return $this->type;
     }
 
-    public function setType(int $type): static
+    public function setType(int $type): self
     {
         $this->type = $type;
 
@@ -154,7 +155,7 @@ class Stream
         return $this->title;
     }
 
-    public function setTitle(string $title): static
+    public function setTitle(string $title): self
     {
         $this->title = $title;
 
@@ -166,7 +167,7 @@ class Stream
         return $this->startAt;
     }
 
-    public function setStartAt(DateTimeImmutable $startAt): static
+    public function setStartAt(DateTimeImmutable $startAt): self
     {
         $this->startAt = $startAt;
 
@@ -181,7 +182,7 @@ class Stream
         return $this->games ??= new ArrayCollection();
     }
 
-    public function addGame(Game $game): static
+    public function addGame(Game $game): self
     {
         if (!$this->games->contains($game)) {
             $this->games->add($game);
@@ -190,7 +191,7 @@ class Stream
         return $this;
     }
 
-    public function removeGame(Game $game): static
+    public function removeGame(Game $game): self
     {
         $this->games->removeElement($game);
 
@@ -202,7 +203,7 @@ class Stream
         return $this->user;
     }
 
-    public function setUser(?User $user): static
+    public function setUser(?User $user): self
     {
         $this->user = $user;
 

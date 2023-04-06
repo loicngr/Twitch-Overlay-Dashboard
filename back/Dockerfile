@@ -17,7 +17,7 @@ ENV SYMFONY_VERSION ${SYMFONY_VERSION}
 
 ENV APP_ENV=prod
 
-WORKDIR /srv/app
+WORKDIR /srv/back
 
 # php extensions installer: https://github.com/mlocati/docker-php-extension-installer
 COPY --from=php_extension_installer --link /usr/bin/install-php-extensions /usr/local/bin/
@@ -90,7 +90,7 @@ RUN set -eux; \
 FROM app_php AS app_php_dev
 
 ENV APP_ENV=dev XDEBUG_MODE=off
-VOLUME /srv/app/var/
+VOLUME /srv/back/var/
 
 RUN rm "$PHP_INI_DIR/conf.d/app.prod.ini"; \
 	mv "$PHP_INI_DIR/php.ini" "$PHP_INI_DIR/php.ini-production"; \
@@ -106,8 +106,8 @@ RUN rm -f .env.local.php
 # Caddy image
 FROM caddy:2.6-alpine AS app_caddy
 
-WORKDIR /srv/app
+WORKDIR /srv/back
 
 COPY --from=app_caddy_builder --link /usr/bin/caddy /usr/bin/caddy
-COPY --from=app_php --link /srv/app/public public/
+COPY --from=app_php --link /srv/back/public public/
 COPY --link docker/caddy/Caddyfile /etc/caddy/Caddyfile

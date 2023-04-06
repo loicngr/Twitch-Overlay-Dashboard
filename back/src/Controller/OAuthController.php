@@ -21,9 +21,9 @@ use Throwable;
 class OAuthController extends BaseController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly string $appVersion,
-        private readonly array $application,
+        protected EntityManagerInterface $entityManager,
+        protected string $appVersion,
+        protected array $application,
         private readonly LoggerInterface $logger,
         private readonly HttpClientInterface $httpClient,
         private readonly OAuthService $authService,
@@ -44,8 +44,8 @@ class OAuthController extends BaseController
         }
 
         $state = sprintf(
-            '%s-%s',
-            (string) $manager->getId(),
+            '%d-%s',
+            $manager->getId(),
             $this->authService->generateOAuthState(30),
         );
 
@@ -54,7 +54,7 @@ class OAuthController extends BaseController
         $twitchOauth->setState($state);
         $managerSettingsFeature->setTwitchOAuth($twitchOauth);
 
-        $em = $this->getManager();
+        $em = $this->entityManager;
         $em->persist($managerSettingsFeature);
         $em->flush();
 
@@ -71,7 +71,7 @@ class OAuthController extends BaseController
     public function oauthTwitch(
         Request $request,
     ): RedirectResponse {
-        $application = $this->getApplication();
+        $application = $this->application;
         $failedUrl = sprintf('%s/error-oauth', $application['url']['front']);
 
         $cbError = fn (string $message = '') => $this->redirect(sprintf('%s?message=%s', $failedUrl, $message));
@@ -88,7 +88,7 @@ class OAuthController extends BaseController
             return $cbError('Invalid request');
         }
 
-        $em = $this->getManager();
+        $em = $this->entityManager;
         /** @var ManagerRepository $rpManager */
         $rpManager = $em->getRepository(Manager::class);
 
@@ -133,17 +133,19 @@ class OAuthController extends BaseController
             }
 
             $content = $response->toArray();
+
+            if (!isset($content['access_token'])) {
+                $this->logger->debug($response->getContent());
+
+                return $cbError('Redirection flow error');
+            }
         } catch (Throwable $e) {
             return $cbError($e->getMessage());
         }
 
-        if (!isset($content['access_token'])) {
-            $this->logger->debug($response->getContent());
-
-            return $cbError('Redirection flow error');
-        }
-
-        $content['created_at'] = new DateTimeImmutable('now');
+        $content['created_at'] = (new DateTimeImmutable('now'))
+            ->format(Variables::DATE_TIME_SERVER)
+        ;
 
         $twitchOauth
             ->reset()

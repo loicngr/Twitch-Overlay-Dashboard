@@ -6,12 +6,10 @@ networks:
 
 volumes:
   php_socket:
+  caddy_srv:
+    external: true
   caddy_data:
   caddy_config:
-  caddy_config_front:
-  caddy_data_front:
-  caddy_data_back:
-  caddy_config_back:
 
 services:
   database:
@@ -29,6 +27,16 @@ services:
       context: ./front
       target: app_node
     restart: unless-stopped
+    networks:
+      - caddy
+    volumes:
+      - caddy_srv:/srv
+    labels:
+      caddy: ${CADDY_FRONT_NAME:-localhost}
+      caddy.root: "* /srv/front/dist/pwa"
+      caddy.encode: zstd gzip
+      caddy.file_server: ""
+      caddy.tls: "internal"
 
   php:
     build:
@@ -37,11 +45,14 @@ services:
       args:
         SYMFONY_VERSION: ${SYMFONY_VERSION:-6.1}
         STABILITY: ${STABILITY:-stable}
+    networks:
+      - caddy
     restart: unless-stopped
     depends_on:
       - database
     volumes:
       - php_socket:/var/run/php
+      - caddy_srv:/srv
     healthcheck:
       interval: 10s
       timeout: 3s
@@ -54,58 +65,36 @@ services:
       DATABASE_PASSWORD: password
       DATABASE_NAME: twitchOverlay
       DATABASE_SERVER_VERSION: mariadb-10.6.12
+    labels:
+      caddy: ${CADDY_BACK_NAME:-api.localhost}
+      caddy.root: "* /srv/back/public"
+      caddy.encode: zstd gzip
+      caddy.file_server: ""
+      caddy.tls: "internal"
+      caddy.php_fastcgi: unix//var/run/php/php-fpm.sock
 
-  caddy_back:
-    build:
-      context: ./back
-      target: app_caddy
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
     ports:
       # HTTP
       - target: 80
-        published: ${FRONT_HTTP_PORT:-80}
+        published: ${HTTP_PORT:-80}
         protocol: tcp
       # HTTPS
       - target: 443
-        published: ${FRONT_HTTPS_PORT:-443}
+        published: ${HTTPS_PORT:-443}
         protocol: tcp
       # HTTP/3
       - target: 443
-        published: ${FRONT_HTTP3_PORT:-443}
+        published: ${HTTP3_PORT:-443}
         protocol: udp
+    environment:
+      - CADDY_INGRESS_NETWORKS=caddy
     networks:
       - caddy
-    depends_on:
-      - php
-    environment:
-      SERVER_NAME: ${CADDY_BACK_NAME:-api.localhost, caddy:80}
     restart: unless-stopped
     volumes:
-      - php_socket:/var/run/php
-      - caddy_data_back:/data
-      - caddy_config_back:/config
-
-  caddy_front:
-    build:
-      context: ./front
-      target: app_caddy
-    ports:
-      # HTTP
-      - target: 80
-        published: ${FRONT_HTTP_PORT:-80}
-        protocol: tcp
-      # HTTPS
-      - target: 443
-        published: ${FRONT_HTTPS_PORT:-443}
-        protocol: tcp
-      # HTTP/3
-      - target: 443
-        published: ${FRONT_HTTP3_PORT:-443}
-        protocol: udp
-    depends_on:
-      - node
-    environment:
-      SERVER_NAME: ${CADDY_FRONT_NAME:-localhost, caddy:80}
-    restart: unless-stopped
-    volumes:
-      - caddy_data_front:/data
-      - caddy_config_front:/config
+      - /var/run/docker.sock:/var/run/docker.sock
+      - caddy_data:/data
+      - caddy_srv:/srv
+      - caddy_config:/config

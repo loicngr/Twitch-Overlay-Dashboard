@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\UserRepository;
+use App\Utils\Constants\Groups;
 use App\Utils\Constants\Variables;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -15,7 +16,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Context;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Groups as ApiGroups;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -26,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(
             normalizationContext: [
                 'groups' => [
-                    'user:read:collection',
+                    Groups::GROUP_USER_READ_COLLECTION,
                 ],
             ],
         ),
@@ -34,7 +35,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             validationContext: [
                 'groups' => [
                     'Default',
-                    'user:create:item',
+                    Groups::GROUP_USER_CREATE_ITEM,
                 ],
             ],
         ),
@@ -42,13 +43,13 @@ use Symfony\Component\Validator\Constraints as Assert;
     ],
     normalizationContext: [
         'groups' => [
-            'user:read:item',
+            Groups::GROUP_USER_READ_ITEM,
         ],
     ],
     denormalizationContext: [
         'groups' => [
-            'user:create:item',
-            'user:update:item',
+            Groups::GROUP_USER_CREATE_ITEM,
+            Groups::GROUP_USER_UPDATE_ITEM,
         ],
     ],
 )]
@@ -57,34 +58,34 @@ class User
     #[ORM\Id]
     #[ORM\Column]
     #[Assert\NotBlank(groups: [
-        'user:create:item',
+        Groups::GROUP_USER_CREATE_ITEM,
     ])]
-    #[Groups([
-        'user:read:collection',
-        'user:read:item',
-        'user:create:item',
-        'game:read:item',
-        'stream:read:item',
+    #[ApiGroups([
+        Groups::GROUP_USER_READ_COLLECTION,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_USER_CREATE_ITEM,
+        Groups::GROUP_GAME_READ_ITEM,
+        Groups::GROUP_STREAM_READ_ITEM,
     ])]
     protected ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups([
-        'user:read:collection',
-        'user:read:item',
-        'user:create:item',
-        'user:update:item',
+    #[ApiGroups([
+        Groups::GROUP_USER_READ_COLLECTION,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_USER_CREATE_ITEM,
+        Groups::GROUP_USER_UPDATE_ITEM,
     ])]
     protected ?string $login = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups([
-        'user:read:collection',
-        'user:read:item',
-        'user:create:item',
-        'user:update:item',
-        'game:read:item',
-        'stream:read:item',
+    #[ApiGroups([
+        Groups::GROUP_USER_READ_COLLECTION,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_USER_CREATE_ITEM,
+        Groups::GROUP_USER_UPDATE_ITEM,
+        Groups::GROUP_GAME_READ_ITEM,
+        Groups::GROUP_STREAM_READ_ITEM,
     ])]
     protected ?string $displayName = null;
 
@@ -92,21 +93,21 @@ class User
         type: Types::TEXT,
         nullable: true,
     )]
-    #[Groups([
-        'user:read:collection',
-        'user:read:item',
-        'user:create:item',
-        'user:update:item',
+    #[ApiGroups([
+        Groups::GROUP_USER_READ_COLLECTION,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_USER_CREATE_ITEM,
+        Groups::GROUP_USER_UPDATE_ITEM,
     ])]
     protected ?string $description = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    #[Groups([
-        'user:read:collection',
-        'user:read:item',
-        'user:create:item',
-        'user:update:item',
+    #[ApiGroups([
+        Groups::GROUP_USER_READ_COLLECTION,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_USER_CREATE_ITEM,
+        Groups::GROUP_USER_UPDATE_ITEM,
     ])]
     protected ?string $email = null;
 
@@ -115,30 +116,30 @@ class User
     #[Context([
         DateTimeNormalizer::FORMAT_KEY => Variables::DATE_SERVER,
     ])]
-    #[Groups([
-        'user:read:collection',
-        'user:read:item',
-        'user:create:item',
+    #[ApiGroups([
+        Groups::GROUP_USER_READ_COLLECTION,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_USER_CREATE_ITEM,
     ])]
     protected ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups([
-        'user:read:collection',
-        'user:read:item',
-        'user:create:item',
-        'user:update:item',
+    #[ApiGroups([
+        Groups::GROUP_USER_READ_COLLECTION,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_USER_CREATE_ITEM,
+        Groups::GROUP_USER_UPDATE_ITEM,
     ])]
     protected ?int $viewCount = null;
 
     #[ORM\Column(length: 300, nullable: true)]
-    #[Groups([
-        'user:read:collection',
-        'user:read:item',
-        'user:create:item',
-        'user:update:item',
-        'game:read:item',
-        'stream:read:item',
+    #[ApiGroups([
+        Groups::GROUP_USER_READ_COLLECTION,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_USER_CREATE_ITEM,
+        Groups::GROUP_USER_UPDATE_ITEM,
+        Groups::GROUP_GAME_READ_ITEM,
+        Groups::GROUP_STREAM_READ_ITEM,
     ])]
     protected ?string $profilePicture = null;
 
@@ -147,8 +148,8 @@ class User
         targetEntity: Stream::class,
         orphanRemoval: true,
     )]
-    #[Groups([
-        'user:read:item',
+    #[ApiGroups([
+        Groups::GROUP_USER_READ_ITEM,
     ])]
     protected ?Collection $streams = null;
 
@@ -162,7 +163,7 @@ class User
         return $this->id;
     }
 
-    public function setId(int $id): static
+    public function setId(int $id): self
     {
         $this->id = $id;
 
@@ -174,7 +175,7 @@ class User
         return $this->login;
     }
 
-    public function setLogin(string $login): static
+    public function setLogin(string $login): self
     {
         $this->login = $login;
 
@@ -186,7 +187,7 @@ class User
         return $this->displayName;
     }
 
-    public function setDisplayName(string $displayName): static
+    public function setDisplayName(string $displayName): self
     {
         $this->displayName = $displayName;
 
@@ -198,7 +199,7 @@ class User
         return $this->description;
     }
 
-    public function setDescription(?string $description): static
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
 
@@ -210,7 +211,7 @@ class User
         return $this->email;
     }
 
-    public function setEmail(string $email): static
+    public function setEmail(string $email): self
     {
         $this->email = $email;
 
@@ -222,7 +223,7 @@ class User
         return $this->createdAt;
     }
 
-    public function setCreatedAt(DateTimeImmutable $createdAt): static
+    public function setCreatedAt(DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
 
@@ -234,7 +235,7 @@ class User
         return $this->viewCount;
     }
 
-    public function setViewCount(?int $viewCount): static
+    public function setViewCount(?int $viewCount): self
     {
         $this->viewCount = $viewCount;
 
@@ -246,7 +247,7 @@ class User
         return $this->profilePicture;
     }
 
-    public function setProfilePicture(?string $profilePicture): static
+    public function setProfilePicture(?string $profilePicture): self
     {
         $this->profilePicture = $profilePicture;
 

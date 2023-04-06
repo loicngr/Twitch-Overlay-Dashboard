@@ -8,10 +8,11 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\GameRepository;
+use App\Utils\Constants\Groups;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Groups as ApiGroups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
@@ -21,7 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(
             normalizationContext: [
                 'groups' => [
-                    'game:read:collection',
+                    Groups::GROUP_GAME_READ_COLLECTION,
                 ],
             ],
         ),
@@ -29,7 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             validationContext: [
                 'groups' => [
                     'Default',
-                    'game:create:item',
+                    Groups::GROUP_GAME_CREATE_ITEM,
                 ],
             ],
         ),
@@ -37,20 +38,20 @@ use Symfony\Component\Validator\Constraints as Assert;
             validationContext: [
                 'groups' => [
                     'Default',
-                    'game:update:item',
+                    Groups::GROUP_GAME_UPDATE_ITEM,
                 ],
             ],
         ),
     ],
     normalizationContext: [
         'groups' => [
-            'game:read:item',
+            Groups::GROUP_GAME_READ_ITEM,
         ],
     ],
     denormalizationContext: [
         'groups' => [
-            'game:create:item',
-            'game:update:item',
+            Groups::GROUP_GAME_CREATE_ITEM,
+            Groups::GROUP_GAME_UPDATE_ITEM,
         ],
     ],
 )]
@@ -58,52 +59,52 @@ class Game
 {
     #[ORM\Id]
     #[ORM\Column]
-    #[Groups([
-        'game:read:collection',
-        'game:read:item',
-        'game:create:item',
-        'user:read:item',
-        'stream:read:item',
+    #[ApiGroups([
+        Groups::GROUP_GAME_READ_COLLECTION,
+        Groups::GROUP_GAME_READ_ITEM,
+        Groups::GROUP_GAME_CREATE_ITEM,
+        Groups::GROUP_USER_READ_ITEM,
+        Groups::GROUP_STREAM_READ_ITEM,
     ])]
     protected ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(
         groups: [
-            'game:create:item',
-            'stream:create:item',
-            'game:update:item',
+            Groups::GROUP_GAME_CREATE_ITEM,
+            Groups::GROUP_STREAM_CREATE_ITEM,
+            Groups::GROUP_GAME_UPDATE_ITEM,
         ],
     )]
-    #[Groups([
-        'game:read:collection',
-        'game:read:item',
-        'game:create:item',
-        'game:update:item',
-        'stream:read:item',
-        'user:read:item',
+    #[ApiGroups([
+        Groups::GROUP_GAME_READ_COLLECTION,
+        Groups::GROUP_GAME_READ_ITEM,
+        Groups::GROUP_GAME_CREATE_ITEM,
+        Groups::GROUP_GAME_UPDATE_ITEM,
+        Groups::GROUP_STREAM_READ_ITEM,
+        Groups::GROUP_USER_READ_ITEM,
     ])]
     protected ?string $name = null;
 
     #[ORM\Column(length: 300)]
-    #[Groups([
-        'game:read:collection',
-        'game:read:item',
-        'game:create:item',
-        'game:update:item',
-        'stream:read:item',
-        'user:read:item',
+    #[ApiGroups([
+        Groups::GROUP_GAME_READ_COLLECTION,
+        Groups::GROUP_GAME_READ_ITEM,
+        Groups::GROUP_GAME_CREATE_ITEM,
+        Groups::GROUP_GAME_UPDATE_ITEM,
+        Groups::GROUP_STREAM_READ_ITEM,
+        Groups::GROUP_USER_READ_ITEM,
     ])]
     protected ?string $picture = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups([
-        'game:read:collection',
-        'game:read:item',
-        'game:create:item',
-        'game:update:item',
-        'stream:read:item',
-        'user:read:item',
+    #[ApiGroups([
+        Groups::GROUP_GAME_READ_COLLECTION,
+        Groups::GROUP_GAME_READ_ITEM,
+        Groups::GROUP_GAME_CREATE_ITEM,
+        Groups::GROUP_GAME_UPDATE_ITEM,
+        Groups::GROUP_STREAM_READ_ITEM,
+        Groups::GROUP_USER_READ_ITEM,
     ])]
     protected ?int $igdbId = null;
 
@@ -111,8 +112,8 @@ class Game
         targetEntity: Stream::class,
         mappedBy: 'games',
     )]
-    #[Groups([
-        'game:read:item',
+    #[ApiGroups([
+        Groups::GROUP_GAME_READ_ITEM,
     ])]
     protected ?Collection $streams = null;
 
@@ -126,7 +127,7 @@ class Game
         return $this->id;
     }
 
-    public function setId(int $id): static
+    public function setId(int $id): self
     {
         $this->id = $id;
 
@@ -138,7 +139,7 @@ class Game
         return $this->name;
     }
 
-    public function setName(string $name): static
+    public function setName(string $name): self
     {
         $this->name = $name;
 
@@ -150,7 +151,7 @@ class Game
         return $this->picture;
     }
 
-    public function setPicture(string $picture): static
+    public function setPicture(string $picture): self
     {
         $this->picture = $picture;
 
@@ -162,7 +163,7 @@ class Game
         return $this->igdbId;
     }
 
-    public function setIgdbId(?int $igdbId): static
+    public function setIgdbId(?int $igdbId): self
     {
         $this->igdbId = $igdbId;
 
@@ -177,7 +178,7 @@ class Game
         return $this->streams ??= new ArrayCollection();
     }
 
-    public function addStream(Stream $stream): static
+    public function addStream(Stream $stream): self
     {
         if (!$this->streams->contains($stream)) {
             $this->streams->add($stream);
@@ -187,7 +188,7 @@ class Game
         return $this;
     }
 
-    public function removeStream(Stream $stream): static
+    public function removeStream(Stream $stream): self
     {
         if ($this->streams->removeElement($stream)) {
             $stream->removeGame($this);

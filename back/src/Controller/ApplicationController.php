@@ -8,17 +8,24 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ApplicationController extends BaseController
 {
-    #[Route('/', name: 'root')]
+    #[Route(
+        path: '/',
+        name: 'root',
+    )]
     public function getRoot(): Response
     {
-        return $this->redirect($this->getApplication()['url']['front']);
+        return $this->redirect($this->application['url']['front']);
     }
 
-    #[Route('/version', name: 'version', methods: Request::METHOD_GET)]
+    #[Route(
+        path: '/version',
+        name: 'version',
+        methods: Request::METHOD_GET,
+    )]
     public function getVersion(): Response
     {
         return $this->json([
-            'version' => $this->getAppVersion(),
+            'version' => $this->appVersion,
         ]);
     }
 }

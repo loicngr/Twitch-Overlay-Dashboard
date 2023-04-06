@@ -14,6 +14,7 @@ network.interceptors.request.use((config) => {
 
   if (t && t.token) {
     config.headers.Authorization = `Bearer ${t.token}`
+    config.headers.accept = `application/json`
   }
 
   if (import.meta.env.DEV && window.xdebug) {
