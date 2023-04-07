@@ -38,9 +38,9 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
     ): void {
         $e = $event->getThrowable();
 
-        match (get_class($e)) {
-            TwitchException::class => $this->handleTwitchException($event),
-        };
+        if ($e instanceof TwitchException) {
+            $this->handleTwitchException($event);
+        }
     }
 
     public static function getSubscribedEvents(): array
